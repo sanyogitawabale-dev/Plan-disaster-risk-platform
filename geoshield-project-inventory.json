@@ -1,0 +1,157 @@
+{
+  "system": "GeoShield India v1.0",
+  "generatedAt": "2026-09-23T08:45:00.000Z",
+  "operationalStatus": "ADVERSARIALLY_VERIFIED_PENDING_INDEPENDENT_VALIDATION",
+  "readinessState": "CONDITIONAL",
+  "blockingDimension": {
+    "dimension": "DATA_QUALITY_AND_HEALTH",
+    "scorePct": 63,
+    "rootCause": "Stale telemetry detected (> 45 min on 3 regional river and coastal gauges: CWC Mahanadi, INCOIS Buoy, Sentinel-1)",
+    "statutoryImplication": "Confidence degradation forces fail-closed state; autonomous consequential actions prohibited; mandatory dual-human review enforced under DM Act 2005"
+  },
+  "metricsForensicInvestigation": {
+    "dataQualityScore": {
+      "reportedValue": 63,
+      "calculationMethod": "Deterministic weighted average of 5 telemetry feeds in adversarialTestSuite.ts (IMD 1.0, CWC 0.65, INCOIS 0.20, Sentinel-1 0.50, OPTCL SCADA 0.80 -> 3.15/5.00 = 63%)",
+      "status": "IMPLEMENTED_DETERMINISTIC_INSPECTION"
+    },
+    "spatialIoUMatch": {
+      "reportedValue": "91.4%",
+      "calculationMethod": "Static empirical benchmark in shadowModeEngine.ts and shadowEventRecorder.ts comparing predicted 151.2 sq km vs observed 142.5 sq km against Sentinel-1 SAR radar backscatter; not dynamically calculated at runtime via pixel-level raster intersection",
+      "status": "CALIBRATED_BENCHMARK_CLAIM_REQUIRING_INDEPENDENT_VALIDATION"
+    },
+    "leadTimeAdvantage": {
+      "reportedValue": "+4.2 hours",
+      "calculationMethod": "Mean delta across 5 operational observation streams in shadowModeEngine.ts (IMD wind +2.5h, INCOIS surge +4.0h, CWC discharge +5.5h, OPTCL SCADA +3.0h, SAR inundation +6.0h; mean = 4.2h); pre-configured scenario baseline",
+      "status": "CALIBRATED_BENCHMARK_CLAIM_REQUIRING_INDEPENDENT_VALIDATION"
+    }
+  },
+  "componentsInventory": {
+    "backendServer": {
+      "path": "server.ts",
+      "runtime": "Node.js / Express 4.21.2 with Vite SPA middleware",
+      "endpoints": [
+        "POST /api/audit-risk",
+        "POST /api/generate-advisory",
+        "POST /api/simulate-scenario",
+        "GET /api/data-feeds/status",
+        "POST /api/data-feeds/sync",
+        "POST /api/maps-grounding",
+        "GET /api/validation-registry",
+        "GET /api/validation-registry/schema",
+        "POST /api/validation-registry/validate",
+        "GET /api/validation-registry/self-audit",
+        "POST /api/validation-registry/certify"
+      ],
+      "aiModel": "gemini-3.8-flash (via @google/genai 2.4.0) with deterministic heuristic fallback when key is absent or exhausted",
+      "status": "IMPLEMENTED"
+    },
+    "compoundHazardEngine": {
+      "path": "src/engine/compoundHazardEngine.ts",
+      "capabilities": [
+        "Astronomical tide harmonic modeling (Survey of India Paradip calibration)",
+        "Meteorological storm surge (Inverse barometer Delta-P + INCOIS ADCIRC wind stress)",
+        "Dynamic wave setup (SWAN radiation stress 0.15*Hs)",
+        "Dynamic wave runup (Stockdon et al. 2006 formulation)",
+        "Estuarine backwater choking & gravity drainage lockout",
+        "Road overtopping passability (MoRTH 5th Rev Section 300)",
+        "Substation plinth safety evaluation (CEA Reg 44(3A))"
+      ],
+      "status": "IMPLEMENTED"
+    },
+    "adversarialTestSuite": {
+      "path": "src/services/adversarialTestSuite.ts",
+      "testVectorsCount": 36,
+      "categories": [
+        "BOUNDARY_THRESHOLDS (14 tests: CEA 0.30m, MoRTH 1.0 ratio, NDMA SACHET 160 chars)",
+        "METROLOGY_AND_UNITS (4 tests: bare numbers, missing datums, unit sanity)",
+        "CORRUPT_AND_MISSING_DATA (6 tests: null, NaN, negative, malformed)",
+        "AUTHORITY_CONFLICTS (1 test: IMD vs INCOIS multi-agency divergence)",
+        "STALE_DATA_HEALTH (1 test: telemetry latency assertion & confidence degradation)",
+        "AI_FAILURE_AND_INDEPENDENCE (3 tests: AI-physics conflict, hallucinated citations)",
+        "CRYPTOGRAPHIC_TAMPERING (2 tests: 1-byte SHA-256 mutation detection)",
+        "REPLAY_ANTI_LEAKAGE (2 tests: future observation rejection)",
+        "FAIL_CLOSED_POLICIES (2 tests: grid safety fail-closed policy adherence)",
+        "UNAUTHORIZED_ACTIONS (1 test: rogue autonomous trip interception)"
+      ],
+      "executionPassRate": "36/36 (100%)",
+      "status": "IMPLEMENTED"
+    },
+    "shadowEventRecorder": {
+      "path": "src/services/shadowEventRecorder.ts",
+      "capabilities": [
+        "6-Stage Lifecycle Tracking (Event -> Observation -> Ingestion -> Prediction -> Recommendation -> Official Decision -> Observed Outcome)",
+        "Domain-specific Prediction vs Observation engine (Hydrology, Surface Water, Wind, Infrastructure, Evacuation)",
+        "What-Changed temporal delta engine (T-1 vs T-0 parameter and consequence mapping)",
+        "Three-level Shadow Mode framework (Historical Replay, Passive Shadow, Parallel Review Console)"
+      ],
+      "status": "IMPLEMENTED"
+    },
+    "authorityResolutionEngine": {
+      "path": "src/services/authorityResolutionEngine.ts",
+      "capabilities": [
+        "Statutory jurisdictional hierarchy mapping (National, State, District)",
+        "Disaster Management Act 2005 Sections 22/24 (SEC) and Section 30 (DDMA) delegation trees",
+        "Electricity Act 2003 Sec 161 & CEA Safety Reg 44(3A) electrical inspector delegations",
+        "MoRTH Section 305 / IRC:SP:13 highway authority delegations",
+        "Mandatory multi-agency conflict resolution protocol (REQUIRE_HUMAN_REVIEW_NO_AUTO_OVERRIDE)"
+      ],
+      "status": "IMPLEMENTED"
+    },
+    "alertBoundaryEngine": {
+      "path": "src/services/alertBoundaryEngine.ts",
+      "capabilities": [
+        "Immutable 5-Tier Alert Classification (OFFICIAL_GOVERNMENT_ALERT -> GEOSHIELD_ANALYSIS -> GEOSHIELD_RECOMMENDATION -> AUTHORIZED_ACTION -> PUBLIC_ALERT)",
+        "Staging mechanism for EOC human review",
+        "Fail-closed assertPublicBroadcastGate preventing autonomous public dissemination"
+      ],
+      "status": "IMPLEMENTED"
+    },
+    "evidenceLineageEngine": {
+      "path": "src/services/evidenceLineageEngine.ts",
+      "capabilities": [
+        "Forensic evidence manifest generation with SHA-256 hashing",
+        "Full lineage attribution: inputs, datums, DEM, asset plinths, gazette clauses, AI non-interference assertion, human authorization status"
+      ],
+      "status": "IMPLEMENTED"
+    },
+    "evidenceChallengeEngine": {
+      "path": "src/services/evidenceChallengeEngine.ts",
+      "capabilities": [
+        "Four-tier statutory taxonomy (SOFTWARE_VERIFIED != EVIDENCE_VERIFIED != OPERATIONALLY_VALIDATED != CERTIFIED)",
+        "12 Blind Provenance Challenges with 100% deterministic reconstruction",
+        "Machine-enforced AI non-interference assertion check"
+      ],
+      "status": "IMPLEMENTED"
+    },
+    "readinessPackGenerator": {
+      "path": "src/services/readinessPackGenerator.ts",
+      "capabilities": [
+        "12-Dimensional Readiness Scorecard calculation",
+        "Machine-readable manifest exports: geoshield-readiness.json, geoshield-adversarial-results.json, geoshield-evidence-manifest.json, geoshield-regulatory-manifest.json"
+      ],
+      "status": "IMPLEMENTED"
+    },
+    "uiComponents": {
+      "geospatialStudio": { "path": "src/components/GeospatialStudio.tsx", "status": "IMPLEMENTED" },
+      "riskEngineDashboard": { "path": "src/components/RiskEngineDashboard.tsx", "status": "IMPLEMENTED" },
+      "digitalTwinViewer": { "path": "src/components/DigitalTwinViewer.tsx", "status": "IMPLEMENTED" },
+      "scenarioSimulator": { "path": "src/components/ScenarioSimulator.tsx", "status": "IMPLEMENTED" },
+      "governanceAndEventMemory": { "path": "src/components/GovernanceAndEventMemory.tsx", "status": "IMPLEMENTED" },
+      "alertDispatchHub": { "path": "src/components/AlertDispatchHub.tsx", "status": "IMPLEMENTED" },
+      "dataQualityMonitor": { "path": "src/components/DataQualityMonitor.tsx", "status": "IMPLEMENTED" },
+      "validationLab": { "path": "src/components/ValidationLab.tsx", "status": "IMPLEMENTED" },
+      "shadowEventRecorderUI": { "path": "src/components/validation/ShadowEventRecorder.tsx", "status": "IMPLEMENTED" },
+      "architectureInspector": { "path": "src/components/ArchitectureInspector.tsx", "status": "IMPLEMENTED" }
+    }
+  },
+  "registries": {
+    "validationMatrix": { "rowsCount": 20, "path": "src/config/geoShieldIndiaValidationRegistry.ts" },
+    "authorityRegistry": { "authoritiesCount": 14, "path": "src/config/indiaAuthorityRegistry.ts" },
+    "hazardPluginRegistry": { "pluginsCount": 8, "path": "src/config/hazardPluginRegistry.ts" },
+    "versionAwareRegulatoryRegistry": { "instrumentsCount": 6, "path": "src/config/versionAwareRegulatoryRegistry.ts" },
+    "scientificModelRegistry": { "modelsCount": 3, "path": "src/config/scientificModelRegistry.ts" },
+    "safetyFailurePolicyRegistry": { "policiesCount": 9, "path": "src/config/safetyFailurePolicyRegistry.ts" },
+    "languageRegistry": { "languagesCount": 12, "path": "src/config/geoShieldIndiaValidationRegistry.ts" }
+  }
+}
