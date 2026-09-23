@@ -1,0 +1,6 @@
+{
+  "name": "Disaster-Risk Intelligence Platform",
+  "description": "Enterprise geospatial multi-hazard early warning, terrain & SAR analytics, deterministic asset vulnerability auditing, and CAP-compliant AI advisory platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
