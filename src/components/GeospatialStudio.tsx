@@ -1,8 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Eye, EyeOff, AlertTriangle, ShieldCheck, MapPin, Wind, Droplet, Mountain, Clock, ChevronRight, Activity, ArrowUpRight, TrendingUp, CheckCircle, AlertCircle, Database, GitCommit } from 'lucide-react';
-import { CriticalAsset, RoadSegment, EvacuationShelter, SarPixelData, StormScenario, TemporalTimeStep, RegionalProfile } from '../types';
+import {
+  Layers,
+  Eye,
+  EyeOff,
+  AlertTriangle,
+  ShieldCheck,
+  MapPin,
+  Wind,
+  Droplet,
+  Mountain,
+  Clock,
+  ChevronRight,
+  Activity,
+  ArrowUpRight,
+  TrendingUp,
+  CheckCircle,
+  AlertCircle,
+  Database,
+  GitCommit,
+  Waves,
+  ExternalLink,
+  Search,
+  Compass,
+  Crosshair,
+  Sparkles,
+  Play,
+  RotateCcw,
+  Sliders,
+  HelpCircle,
+  Info
+} from 'lucide-react';
+import {
+  CriticalAsset,
+  RoadSegment,
+  EvacuationShelter,
+  SarPixelData,
+  StormScenario,
+  TemporalTimeStep,
+  RegionalProfile,
+  GoogleFloodGaugeRecord
+} from '../types';
 import { TEMPORAL_TIMELINE, DATA_QUALITY_FEEDS } from '../data/mockDisasterData';
-import { INDIA_TEMPORAL_TIMELINE, INDIA_DATA_FEEDS } from '../data/indiaDisasterData';
+import { INDIA_TEMPORAL_TIMELINE, INDIA_DATA_FEEDS, INDIA_CWC_GAUGES } from '../data/indiaDisasterData';
+import { SpatialAreaSelection } from '../types/areaIntelligence';
+import { analyzeSpatialContext, resolveGeographicLocation } from '../services/areaIntelligenceEngine';
+import { AreaIntelligencePanel } from './geospatial/AreaIntelligencePanel';
 
 interface GeospatialStudioProps {
   scenario: StormScenario;
@@ -34,14 +76,52 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
   const [showAssets, setShowAssets] = useState(true);
   const [showRoads, setShowRoads] = useState(true);
   const [showShelters, setShowShelters] = useState(true);
+  const [showRiverGauges, setShowRiverGauges] = useState(true);
 
   // Time scrubber (hours until landfall)
   const [timeOffsetHours, setTimeOffsetHours] = useState(scenario.landfallEtaHours);
   const [selectedTimeStepId, setSelectedTimeStepId] = useState<'T-24h' | 'T-12h' | 'T-6h' | 'NOW' | 'T+6h' | 'T+12h'>('NOW');
   const [showDataQualityDrawer, setShowDataQualityDrawer] = useState(false);
 
-  // Selected asset
+  // Selected asset or CWC river gauge
   const [selectedAsset, setSelectedAsset] = useState<CriticalAsset | null>(assets[0] || null);
+  const [selectedGauge, setSelectedGauge] = useState<GoogleFloodGaugeRecord | null>(null);
+  const [cwcGauges, setCwcGauges] = useState<GoogleFloodGaugeRecord[]>(INDIA_CWC_GAUGES);
+
+  // =========================================================================
+  // AREA INTELLIGENCE & SPATIAL SITUATION INSPECTOR STATE
+  // =========================================================================
+  const [isObserveAreaMode, setIsObserveAreaMode] = useState<boolean>(true);
+  const [selectedRadiusKm, setSelectedRadiusKm] = useState<number>(10);
+  const [selectedArea, setSelectedArea] = useState<SpatialAreaSelection | null>(() => {
+    return {
+      type: 'click',
+      coords: isIndia
+        ? { lat: 20.490, lng: 85.892, svgX: 240, svgY: 245 }
+        : { lat: 27.77, lng: -81.55, svgX: 380, svgY: 290 },
+      radiusKm: 10,
+      locationName: isIndia ? 'Jobra Barrage & Cuttack Delta' : 'Maple General Hospital Complex',
+      districtState: isIndia ? 'Cuttack, Odisha' : 'Central District, Maple County'
+    };
+  });
+
+  // Right Panel Tab: 'area_intelligence' or 'asset_inspector'
+  const [inspectorTab, setInspectorTab] = useState<'area_intelligence' | 'asset_inspector'>('area_intelligence');
+
+  // Location search state
+  const [searchLocationQuery, setSearchLocationQuery] = useState<string>('');
+  const [showSearchDropdown, setShowSearchDropdown] = useState<boolean>(false);
+
+  // Feature highlighting trigger from "Show on Map"
+  const [highlightedFeature, setHighlightedFeature] = useState<{
+    type: string;
+    coords?: { x: number; y: number };
+    name?: string;
+    timestamp: number;
+  } | null>(null);
+
+  // Spatial Story Mode active step index
+  const [activeStoryStepIndex, setActiveStoryStepIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (assets.length > 0) {
@@ -49,12 +129,132 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
     }
   }, [assets]);
 
+  // Fetch live CWC gauges from Google Flood Forecasting API endpoint
+  useEffect(() => {
+    fetch('/api/telemetry/gauges')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.gauges && d.gauges.length > 0) {
+          setCwcGauges(d.gauges);
+        }
+      })
+      .catch(e => console.warn('Could not fetch /api/telemetry/gauges, using static dataset:', e));
+  }, []);
+
   // Current temporal step data
   const currentStepData = activeTimeline.find(t => t.stepId === selectedTimeStepId) || activeTimeline[3];
   const previousStepData = activeTimeline[Math.max(0, activeTimeline.findIndex(t => t.stepId === selectedTimeStepId) - 1)];
 
   // Surge level scales dynamically with time offset
   const dynamicSurgeLevel = Math.max(0.8, scenario.projectedSurgeMaxM * (1 - Math.abs(timeOffsetHours - 0.5) / 10));
+
+  // Compute live Area Intelligence Analysis
+  const areaAnalysis = selectedArea
+    ? analyzeSpatialContext(
+        selectedArea,
+        selectedTimeStepId,
+        scenario,
+        assets,
+        roads,
+        shelters,
+        sarHotspots,
+        cwcGauges,
+        regionalProfile
+      )
+    : null;
+
+  // Handle map click anywhere on SVG stage to select and observe area
+  const handleSvgMapClick = (e: React.MouseEvent<SVGSVGElement>) => {
+    const svg = e.currentTarget;
+    const rect = svg.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+
+    const svgX = Math.round((clickX / rect.width) * 800);
+    const svgY = Math.round((clickY / rect.height) * 600);
+
+    const clampedX = Math.max(20, Math.min(780, svgX));
+    const clampedY = Math.max(20, Math.min(580, svgY));
+
+    const geo = resolveGeographicLocation(clampedX, clampedY, isIndia);
+
+    setSelectedArea({
+      type: 'click',
+      coords: {
+        lat: geo.lat,
+        lng: geo.lng,
+        svgX: clampedX,
+        svgY: clampedY
+      },
+      radiusKm: selectedRadiusKm,
+      locationName: geo.locationName,
+      districtState: geo.districtState
+    });
+
+    setInspectorTab('area_intelligence');
+  };
+
+  // Handle "Show on Map" highlight request
+  const handleHighlightFeature = (featureType: string, details?: any) => {
+    let targetCoords = { x: 240, y: 245 };
+    if (featureType === 'river') {
+      targetCoords = { x: 240, y: 245 };
+    } else if (featureType === 'surge') {
+      targetCoords = { x: 550, y: 340 };
+    } else if (featureType === 'wind' || featureType === 'storm') {
+      targetCoords = isIndia ? { x: 680, y: 200 } : { x: 100, y: 150 };
+    } else if (featureType === 'slope') {
+      targetCoords = { x: 100, y: 80 };
+    } else if (featureType === 'asset' && details) {
+      if (details.id?.includes('paradip_substation')) targetCoords = { x: 505, y: 325 };
+      else if (details.id?.includes('scb_medical')) targetCoords = { x: 180, y: 250 };
+      else if (details.id?.includes('jobra_barrage')) targetCoords = { x: 215, y: 235 };
+      else if (details.id?.includes('kendrapara')) targetCoords = { x: 380, y: 175 };
+      else if (details.id?.includes('dhamra')) targetCoords = { x: 600, y: 120 };
+    } else if (details && details.x && details.y) {
+      targetCoords = { x: details.x, y: details.y };
+    }
+
+    setHighlightedFeature({
+      type: featureType,
+      coords: targetCoords,
+      name: details?.name || featureType,
+      timestamp: Date.now()
+    });
+
+    setTimeout(() => {
+      setHighlightedFeature((curr) => (curr && Date.now() - curr.timestamp >= 5900 ? null : curr));
+    }, 6000);
+  };
+
+  // Predefined location anchors for quick search
+  const searchAnchors = isIndia
+    ? [
+        { name: 'Jobra Barrage & Cuttack Delta', district: 'Cuttack, Odisha', x: 240, y: 245, lat: 20.490, lng: 85.892 },
+        { name: 'Naraj Delta Head', district: 'Cuttack, Odisha', x: 200, y: 230, lat: 20.468, lng: 85.802 },
+        { name: 'SCB Medical College & AIIMS', district: 'Cuttack, Odisha', x: 180, y: 250, lat: 20.468, lng: 85.882 },
+        { name: 'OPTCL 220kV Paradip Grid', district: 'Jagatsinghpur, Odisha', x: 505, y: 325, lat: 20.312, lng: 86.608 },
+        { name: 'Paradip Port & Estuary', district: 'Jagatsinghpur, Odisha', x: 560, y: 340, lat: 20.290, lng: 86.670 },
+        { name: 'Jenapur Railway Bridge', district: 'Jajpur, Odisha', x: 275, y: 135, lat: 20.865, lng: 86.024 },
+        { name: 'Anandapur River Basin', district: 'Keonjhar, Odisha', x: 260, y: 65, lat: 21.215, lng: 86.120 },
+        { name: 'Alipingal & Devi River Estuary', district: 'Jagatsinghpur, Odisha', x: 385, y: 370, lat: 20.240, lng: 86.230 },
+        { name: 'Dhamra Port & Estuarine Buffer', district: 'Bhadrak, Odisha', x: 600, y: 120, lat: 20.814, lng: 86.953 },
+        { name: 'Similipal Foothills & Escarpment', district: 'Mayurbhanj, Odisha', x: 100, y: 80, lat: 21.500, lng: 85.900 }
+      ]
+    : [
+        { name: 'Maple General Hospital Complex', district: 'Central District', x: 380, y: 290, lat: 27.77, lng: -81.55 },
+        { name: 'Substation 4B Coastal Transmission', district: 'Bayfront Sector', x: 270, y: 340, lat: 27.72, lng: -81.62 },
+        { name: 'South River Lift Station & Treatment', district: 'River Estuary', x: 220, y: 470, lat: 27.65, lng: -81.65 },
+        { name: 'Pine Ridge Mountain Escarpment', district: 'Highland Ridge', x: 640, y: 90, lat: 27.90, lng: -81.42 }
+      ];
+
+  const filteredAnchors = searchAnchors.filter(a =>
+    a.name.toLowerCase().includes(searchLocationQuery.toLowerCase()) ||
+    a.district.toLowerCase().includes(searchLocationQuery.toLowerCase())
+  );
+
+  // SVG radius pixel conversion: 1km approx 4px
+  const radiusSvgPx = selectedRadiusKm / 0.25;
 
   return (
     <div className="space-y-4">
@@ -66,7 +266,7 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
               <h2 className="text-base font-bold text-white tracking-wide flex items-center gap-2">
                 <Layers className="w-4 h-4 text-amber-400" />
                 {isIndia
-                  ? 'Multi-Hazard Geospatial Studio • Odisha Coast & Mahanadi Delta (IMD / OSDMA)'
+                  ? 'Multi-Hazard Geospatial Studio • Live Spatial Composite & Area Intelligence'
                   : 'Multi-Hazard Geospatial Studio • Maple County Corridor'}
               </h2>
               <span className="text-[11px] bg-slate-800 text-slate-300 font-mono px-2 py-0.5 rounded border border-slate-700">
@@ -74,7 +274,7 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Real-time hydrodynamic SLOSH surge simulation + Sentinel-1 SAR soil saturation + critical infrastructure GIS overlay.
+              Select any area on the map to inspect real-time contributing conditions, active hazards, infrastructure exposure, deltas, and scientific provenance.
             </p>
           </div>
 
@@ -336,6 +536,22 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                 </div>
                 {showShelters ? <Eye className="w-3.5 h-3.5 text-teal-400" /> : <EyeOff className="w-3.5 h-3.5" />}
               </button>
+
+              <button
+                id="layer-toggle-river-gauges"
+                onClick={() => setShowRiverGauges(!showRiverGauges)}
+                className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs font-medium border transition-all ${
+                  showRiverGauges
+                    ? 'bg-cyan-950/40 border-cyan-800/80 text-cyan-300'
+                    : 'bg-slate-950/60 border-slate-800/60 text-slate-500'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <Droplet className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>CWC River Gauges (Google Flood API)</span>
+                </div>
+                {showRiverGauges ? <Eye className="w-3.5 h-3.5 text-cyan-400" /> : <EyeOff className="w-3.5 h-3.5" />}
+              </button>
             </div>
 
             {/* Scientific Pipeline Status */}
@@ -384,32 +600,125 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
         </div>
 
         {/* Central Map Canvas */}
-        <div className="lg:col-span-6 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden relative min-h-[520px] flex flex-col">
+        <div className="lg:col-span-5 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden relative min-h-[580px] flex flex-col">
+          {/* Map Top Action & Search Bar */}
+          <div className="bg-slate-900/90 border-b border-slate-800 p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 text-xs">
+            {/* Observe Area Tool Toggle */}
+            <div className="flex items-center space-x-2">
+              <button
+                id="btn-observe-area-toggle"
+                onClick={() => setIsObserveAreaMode(!isObserveAreaMode)}
+                className={`px-3 py-1.5 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all cursor-pointer ${
+                  isObserveAreaMode
+                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+                title="When active, click anywhere on map or hazard polygon to inspect area"
+              >
+                <Crosshair className="w-3.5 h-3.5" />
+                <span>🔍 Observe Area</span>
+                {isObserveAreaMode && (
+                  <span className="w-2 h-2 rounded-full bg-slate-950 animate-ping ml-0.5"></span>
+                )}
+              </button>
+
+              {/* Radius Quick Selector */}
+              <div className="flex items-center space-x-1 bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-[10px] font-mono">
+                {[5, 10, 25].map(r => (
+                  <button
+                    key={r}
+                    onClick={() => {
+                      setSelectedRadiusKm(r);
+                      if (selectedArea) setSelectedArea({ ...selectedArea, radiusKm: r });
+                    }}
+                    className={`px-1.5 py-0.5 rounded ${
+                      selectedRadiusKm === r ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {r}k
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Location Quick Search Dropdown */}
+            <div className="relative">
+              <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 space-x-1.5">
+                <Search className="w-3.5 h-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search city, river, asset..."
+                  value={searchLocationQuery}
+                  onFocus={() => setShowSearchDropdown(true)}
+                  onChange={(e) => setSearchLocationQuery(e.target.value)}
+                  className="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none w-36 sm:w-44"
+                />
+                {searchLocationQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchLocationQuery('');
+                      setShowSearchDropdown(false);
+                    }}
+                    className="text-slate-500 hover:text-slate-300 text-[10px]"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Search results dropdown */}
+              {showSearchDropdown && (
+                <div className="absolute right-0 top-full mt-1 w-64 bg-slate-950 border border-slate-800 rounded-lg shadow-2xl z-50 p-1 space-y-1 max-h-56 overflow-y-auto">
+                  <div className="text-[10px] font-bold uppercase text-slate-400 px-2 py-1 border-b border-slate-800/80">
+                    Jump to Spatial Location:
+                  </div>
+                  {filteredAnchors.map((item) => (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        setSelectedArea({
+                          type: 'search',
+                          coords: { lat: item.lat, lng: item.lng, svgX: item.x, svgY: item.y },
+                          radiusKm: selectedRadiusKm,
+                          locationName: item.name,
+                          districtState: item.district
+                        });
+                        setInspectorTab('area_intelligence');
+                        setShowSearchDropdown(false);
+                        setSearchLocationQuery('');
+                      }}
+                      className="w-full text-left p-1.5 rounded hover:bg-slate-800 flex items-center justify-between text-xs text-slate-200 transition-colors"
+                    >
+                      <div className="truncate">
+                        <div className="font-semibold truncate text-[11px]">{item.name}</div>
+                        <div className="text-[9px] text-slate-400 font-mono">{item.district}</div>
+                      </div>
+                      <ChevronRight className="w-3 h-3 text-slate-500 shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Map Status Bar */}
-          <div className="bg-slate-900/90 border-b border-slate-800 px-4 py-2 flex items-center justify-between text-xs">
+          <div className="bg-slate-900/60 border-b border-slate-800 px-4 py-1.5 flex items-center justify-between text-[11px]">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
-              <span className="font-mono text-slate-300">
-                {isIndia ? 'Live Spatial Composite • 20.31°N, 86.61°E (Bay of Bengal / Mahanadi Delta)' : 'Live Spatial Composite • 27.7°N, -81.5°W'}
+              <span className="font-mono text-slate-300 truncate">
+                {selectedArea ? `Selected: ${selectedArea.locationName} (${selectedRadiusKm}km ring)` : 'Click map to inspect any area'}
               </span>
             </div>
-            <div className="flex items-center space-x-3 text-[11px] text-slate-400">
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-blue-500 inline-block"></span> {isIndia ? 'Bay of Bengal Surge' : 'Ocean Surge'}
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-orange-600 inline-block"></span> {isIndia ? 'Ghats Escarpment' : 'Steep Slopes'}
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> {isIndia ? 'ISRO/InSAR Saturation' : 'SAR Saturation'}
-              </span>
+            <div className="text-[10px] text-amber-400 font-mono">
+              [Click anywhere to inspect]
             </div>
           </div>
 
           {/* Interactive SVG Geospatial Stage */}
-          <div className="relative flex-1 bg-slate-950 overflow-hidden flex items-center justify-center p-2 select-none">
+          <div className="relative flex-1 bg-slate-950 overflow-hidden flex items-center justify-center p-2 select-none cursor-crosshair">
             <svg
               viewBox="0 0 800 600"
+              onClick={handleSvgMapClick}
               className="w-full h-full max-h-[580px]"
               style={{ background: 'radial-gradient(circle at 70% 30%, #091e3a 0%, #030712 85%)' }}
             >
@@ -439,6 +748,19 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                   <stop offset="70%" stopColor="#059669" stopOpacity="0.25" />
                   <stop offset="100%" stopColor="#047857" stopOpacity="0" />
                 </radialGradient>
+
+                {/* Radial spotlight for selected area focus */}
+                {selectedArea && (
+                  <mask id="areaSpotlightMask">
+                    <rect x="0" y="0" width="800" height="600" fill="#ffffff" />
+                    <circle
+                      cx={selectedArea.coords.svgX}
+                      cy={selectedArea.coords.svgY}
+                      r={radiusSvgPx}
+                      fill="#666666"
+                    />
+                  </mask>
+                )}
               </defs>
 
               {/* Grid Reference Coordinate Lines */}
@@ -469,20 +791,46 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                     d="M 520,0 L 800,0 L 800,600 L 620,600 C 570,520 520,440 500,350 C 480,240 510,130 520,0 Z"
                     fill="url(#oceanGrad)"
                   />
-                  {/* Mahanadi River Trunk & Delta Channels */}
+                  {/* Mahanadi River Trunk & Delta Channels - Clickable Hazard Area */}
                   <path
                     d="M 0,230 C 130,220 200,245 320,270 C 400,290 460,310 505,325"
                     fill="none"
                     stroke="#0284c7"
-                    strokeWidth="5"
+                    strokeWidth="7"
                     strokeLinecap="round"
+                    className="cursor-pointer hover:stroke-cyan-300 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedArea({
+                        type: 'hazard_zone',
+                        coords: { lat: 20.490, lng: 85.892, svgX: 240, svgY: 245 },
+                        radiusKm: selectedRadiusKm,
+                        locationName: 'Mahanadi River Basin (Trunk Channel)',
+                        districtState: 'Cuttack District, Odisha',
+                        hazardZoneType: 'river_channel'
+                      });
+                      setInspectorTab('area_intelligence');
+                    }}
                   />
                   <path
                     d="M 220,245 C 270,285 360,370 480,440"
                     fill="none"
                     stroke="#0284c7"
-                    strokeWidth="3.5"
+                    strokeWidth="5"
                     strokeLinecap="round"
+                    className="cursor-pointer hover:stroke-cyan-300 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedArea({
+                        type: 'hazard_zone',
+                        coords: { lat: 20.240, lng: 86.230, svgX: 385, svgY: 370 },
+                        radiusKm: selectedRadiusKm,
+                        locationName: 'Devi Distributary River Channel',
+                        districtState: 'Jagatsinghpur District, Odisha',
+                        hazardZoneType: 'river_channel'
+                      });
+                      setInspectorTab('area_intelligence');
+                    }}
                   />
                 </>
               ) : (
@@ -502,14 +850,29 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
 
               {/* DEM Elevation Contours & Mountain Slopes Layer */}
               {showDemSlope && (
-                <g id="dem-slope-layer">
+                <g
+                  id="dem-slope-layer"
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedArea({
+                      type: 'hazard_zone',
+                      coords: { lat: 21.50, lng: 85.90, svgX: 100, svgY: 80 },
+                      radiusKm: selectedRadiusKm,
+                      locationName: isIndia ? 'Similipal Foothills & Eastern Ghats Ridge' : 'Pine Ridge Escarpment',
+                      districtState: isIndia ? 'Mayurbhanj District, Odisha' : 'Highland Ridge',
+                      hazardZoneType: 'slope_escarpment'
+                    });
+                    setInspectorTab('area_intelligence');
+                  }}
+                >
                   {isIndia ? (
                     <>
                       <path
                         d="M 0,0 L 220,0 C 200,80 150,150 100,200 L 0,210 Z"
                         fill="url(#slopeGrad)"
                         stroke="#f97316"
-                        strokeWidth="1"
+                        strokeWidth="1.5"
                         strokeDasharray="4 2"
                       />
                       <text x="30" y="70" fill="#fdba74" fontSize="11" fontFamily="monospace" fontWeight="bold">
@@ -528,13 +891,6 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                       <text x="640" y="140" fill="#fdba74" fontSize="11" fontFamily="monospace" fontWeight="bold">
                         Pine Ridge Escarpment (Slope: 31°-38°)
                       </text>
-                      <path
-                        d="M 380,180 C 430,220 480,260 520,380 C 460,420 400,360 360,260 Z"
-                        fill="#431407"
-                        fillOpacity="0.35"
-                        stroke="#c2410c"
-                        strokeWidth="0.8"
-                      />
                     </>
                   )}
                 </g>
@@ -551,7 +907,22 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                       ? 450 - ((spot.coordinates[0] - 20.0) / 1.0) * 350
                       : 200 + (27.95 - spot.coordinates[0]) * 1500;
                     return (
-                      <g key={spot.id} className="cursor-pointer">
+                      <g
+                        key={spot.id}
+                        className="cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedArea({
+                            type: 'hazard_zone',
+                            coords: { lat: spot.coordinates[0], lng: spot.coordinates[1], svgX: cx, svgY: cy },
+                            radiusKm: selectedRadiusKm,
+                            locationName: `SAR Soil Saturation Hotspot (${(spot.sarRelativeSaturation * 100).toFixed(0)}%)`,
+                            districtState: isIndia ? 'Coastal Floodplain, Odisha' : 'Wetland Zone',
+                            hazardZoneType: 'sar_soil_moisture'
+                          });
+                          setInspectorTab('area_intelligence');
+                        }}
+                      >
                         <circle cx={cx} cy={cy} r="45" fill="url(#sarGlow)" />
                         <circle cx={cx} cy={cy} r="6" fill="#10b981" stroke="#ffffff" strokeWidth="1.5" />
                         <circle cx={cx} cy={cy} r="18" fill="none" stroke="#34d399" strokeWidth="1" strokeDasharray="3 2" className="animate-spin" />
@@ -564,9 +935,24 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                 </g>
               )}
 
-              {/* Hydrodynamic Storm Surge Inundation Polygon Layer */}
+              {/* Hydrodynamic Storm Surge Inundation Polygon Layer (Clickable Hazard Zone) */}
               {showSurgeLayer && (
-                <g id="hydrodynamic-surge-layer">
+                <g
+                  id="hydrodynamic-surge-layer"
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedArea({
+                      type: 'hazard_zone',
+                      coords: { lat: 20.35, lng: 86.70, svgX: 550, svgY: 340 },
+                      radiusKm: selectedRadiusKm,
+                      locationName: isIndia ? 'Bay of Bengal Hydrodynamic Surge Zone' : 'Ocean Surge Inundation Corridor',
+                      districtState: isIndia ? 'Coastal Jagatsinghpur / Kendrapara' : 'Coastal Zone',
+                      hazardZoneType: 'surge_inundation'
+                    });
+                    setInspectorTab('area_intelligence');
+                  }}
+                >
                   {isIndia ? (
                     <>
                       <path
@@ -574,7 +960,7 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                         fill="url(#surgeWater)"
                         stroke="#38bdf8"
                         strokeWidth="2"
-                        className="transition-all duration-300"
+                        className="transition-all duration-300 hover:opacity-90"
                       />
                       <path
                         d="M 750,50 C 510,180 470,330 520,550"
@@ -584,7 +970,7 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                         strokeDasharray="5 3"
                       />
                       <text x="460" y="420" fill="#bae6fd" fontSize="12" fontWeight="bold" fontFamily="monospace">
-                        Surge Crest: +{dynamicSurgeLevel.toFixed(1)}m GTS MSL
+                        Surge Crest: +{dynamicSurgeLevel.toFixed(1)}m GTS MSL (Click to Inspect)
                       </text>
                     </>
                   ) : (
@@ -595,13 +981,6 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                         stroke="#38bdf8"
                         strokeWidth="2"
                         className="transition-all duration-300"
-                      />
-                      <path
-                        d="M 20,20 C 220,120 260,250 210,480"
-                        fill="none"
-                        stroke="#7dd3fc"
-                        strokeWidth="1"
-                        strokeDasharray="5 3"
                       />
                       <text x="180" y="380" fill="#bae6fd" fontSize="12" fontWeight="bold" fontFamily="monospace">
                         Surge Crest Zone: +{dynamicSurgeLevel.toFixed(1)}m MSL
@@ -632,6 +1011,18 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                         stroke={dynamicSurgeLevel > 2.0 ? '#ef4444' : '#a855f7'}
                         strokeWidth="4"
                         strokeLinecap="round"
+                        className="cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedArea({
+                            type: 'hazard_zone',
+                            coords: { lat: 20.38, lng: 86.32, svgX: 350, svgY: 290 },
+                            radiusKm: selectedRadiusKm,
+                            locationName: 'SH-12 Cuttack-Paradip Highway Causeway',
+                            districtState: 'Cuttack / Jagatsinghpur, Odisha'
+                          });
+                          setInspectorTab('area_intelligence');
+                        }}
                       />
                       {dynamicSurgeLevel > 2.0 && (
                         <g transform="translate(420, 310)">
@@ -651,7 +1042,6 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                     </>
                   ) : (
                     <>
-                      {/* Route 101 South Causeway (Coastal - Submerged) */}
                       <path
                         d="M 170,540 Q 230,420 260,330"
                         fill="none"
@@ -659,14 +1049,6 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                         strokeWidth="4"
                         strokeLinecap="round"
                       />
-                      {dynamicSurgeLevel > 2.0 && (
-                        <g transform="translate(210, 430)">
-                          <circle r="12" fill="#7f1d1d" stroke="#ef4444" strokeWidth="2" />
-                          <line x1="-5" y1="-5" x2="5" y2="5" stroke="#ffffff" strokeWidth="2" />
-                          <line x1="5" y1="-5" x2="-5" y2="5" stroke="#ffffff" strokeWidth="2" />
-                        </g>
-                      )}
-                      {/* Highway 44 Highland Bypass (Safe Route) */}
                       <path
                         d="M 260,330 C 350,290 420,220 540,160"
                         fill="none"
@@ -674,14 +1056,6 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                         strokeWidth="4"
                         strokeLinecap="round"
                         strokeDasharray="8 3"
-                      />
-                      {/* Pine Valley Mountain Road */}
-                      <path
-                        d="M 420,220 Q 510,180 620,120"
-                        fill="none"
-                        stroke="#eab308"
-                        strokeWidth="3"
-                        strokeLinecap="round"
                       />
                     </>
                   )}
@@ -722,15 +1096,25 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                       <g
                         key={asset.id}
                         transform={`translate(${px}, ${py})`}
-                        onClick={() => setSelectedAsset(asset)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedAsset(asset);
+                          setSelectedGauge(null);
+                          setSelectedArea({
+                            type: 'asset',
+                            coords: { lat: asset.coordinates[0], lng: asset.coordinates[1], svgX: px, svgY: py },
+                            radiusKm: selectedRadiusKm,
+                            locationName: asset.name,
+                            districtState: isIndia ? 'Odisha Lifeline Node' : 'Lifeline Node',
+                            assetRef: asset
+                          });
+                        }}
                         className="cursor-pointer transition-transform hover:scale-125"
                       >
-                        {/* Selection halo */}
                         {isSelected && (
                           <circle r="22" fill="none" stroke="#f59e0b" strokeWidth="2" className="animate-pulse" />
                         )}
 
-                        {/* Status outer circle */}
                         <circle
                           r="14"
                           fill={isSubmerged ? '#7f1d1d' : asset.status === 'critical_failure' ? '#78350f' : '#0f172a'}
@@ -738,7 +1122,6 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                           strokeWidth="2.5"
                         />
 
-                        {/* Center glyph */}
                         <text
                           y="4"
                           textAnchor="middle"
@@ -750,7 +1133,6 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                           {isSubstation ? '⚡' : isHospital ? '🏥' : isBridge ? '🌉' : isWater ? '💧' : '📡'}
                         </text>
 
-                        {/* Label */}
                         <text
                           x="18"
                           y="4"
@@ -762,22 +1144,6 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                         >
                           {asset.name.split(' ')[0]} {asset.name.split(' ')[1] || ''}
                         </text>
-
-                        {isSubmerged && (
-                          <rect
-                            x="18"
-                            y="7"
-                            width="64"
-                            height="13"
-                            rx="2"
-                            fill="#ef4444"
-                          />
-                        )}
-                        {isSubmerged && (
-                          <text x="21" y="17" fill="#ffffff" fontSize="8" fontWeight="bold" fontFamily="monospace">
-                            FLOODED -{(dynamicSurgeLevel - asset.finishedFloorElevation).toFixed(1)}m
-                          </text>
-                        )}
                       </g>
                     );
                   })}
@@ -811,6 +1177,77 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
                 </g>
               )}
 
+              {/* CWC Telemetric River Stage Gauges (Google Flood Forecasting API Gateway) */}
+              {showRiverGauges && (
+                <g id="river-gauges-layer">
+                  {cwcGauges.map((gauge) => {
+                    let gx = 200;
+                    let gy = 230;
+                    if (gauge.stationCode === 'CWC_MHD_03B') { gx = 200; gy = 230; }
+                    else if (gauge.stationCode === 'CWC_MHD_04A') { gx = 240; gy = 245; }
+                    else if (gauge.stationCode === 'CWC_BRH_02C') { gx = 275; gy = 135; }
+                    else if (gauge.stationCode === 'CWC_BTR_01A') { gx = 260; gy = 65; }
+                    else if (gauge.stationCode === 'CWC_MHD_08F') { gx = 385; gy = 370; }
+
+                    const isSelected = selectedGauge?.gaugeId === gauge.gaugeId;
+                    const isDanger = gauge.waterLevelM >= gauge.dangerLevelM;
+                    const isWarning = gauge.waterLevelM >= gauge.warningLevelM;
+
+                    return (
+                      <g
+                        key={gauge.gaugeId}
+                        transform={`translate(${gx}, ${gy})`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedGauge(gauge);
+                          setSelectedAsset(null);
+                          setSelectedArea({
+                            type: 'hazard_zone',
+                            coords: { lat: gauge.coordinates.latitude, lng: gauge.coordinates.longitude, svgX: gx, svgY: gy },
+                            radiusKm: selectedRadiusKm,
+                            locationName: `${gauge.gaugeName} (${gauge.riverName})`,
+                            districtState: `${gauge.basin.replace(/_/g, ' ')}, Odisha`,
+                            gaugeRef: gauge
+                          });
+                        }}
+                        className="cursor-pointer transition-transform hover:scale-125"
+                      >
+                        {isSelected && (
+                          <circle r="22" fill="none" stroke="#06b6d4" strokeWidth="2.5" className="animate-pulse" />
+                        )}
+                        <circle
+                          r="13"
+                          fill={isDanger ? '#7f1d1d' : isWarning ? '#78350f' : '#083344'}
+                          stroke={isDanger ? '#ef4444' : isWarning ? '#f59e0b' : '#06b6d4'}
+                          strokeWidth="2"
+                        />
+                        <text
+                          y="4"
+                          textAnchor="middle"
+                          fill="#ffffff"
+                          fontSize="9"
+                          fontWeight="bold"
+                          fontFamily="sans-serif"
+                        >
+                          💧
+                        </text>
+                        <text
+                          x="16"
+                          y="4"
+                          fill={isSelected ? '#22d3ee' : '#cbd5e1'}
+                          fontSize="9"
+                          fontWeight="bold"
+                          fontFamily="monospace"
+                          className="drop-shadow"
+                        >
+                          {gauge.gaugeName.split(' ')[0]} ({gauge.waterLevelM.toFixed(1)}m)
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              )}
+
               {/* Cyclone Eye / Wind Vector Overlay */}
               <g
                 transform={isIndia ? "translate(680, 200)" : "translate(100, 150)"}
@@ -832,128 +1269,404 @@ export const GeospatialStudio: React.FC<GeospatialStudioProps> = ({
               >
                 {scenario.name} Eye • {scenario.maxWindsKmh} km/h
               </text>
+
+              {/* ==================================================================== */}
+              {/* SECTION 23: "FOCUS THIS AREA" VISUAL EFFECT OVERLAY                  */}
+              {/* Dims unrelated areas, highlights selected radius boundary & crosshair */}
+              {/* ==================================================================== */}
+              {selectedArea && (
+                <g id="area-focus-overlay" pointerEvents="none">
+                  {/* Subtle darkening vignette on unselected map areas */}
+                  <rect
+                    x="0"
+                    y="0"
+                    width="800"
+                    height="600"
+                    fill="#030712"
+                    opacity="0.30"
+                    mask="url(#areaSpotlightMask)"
+                  />
+
+                  {/* Pulsing Selection Radius Ring */}
+                  <circle
+                    cx={selectedArea.coords.svgX}
+                    cy={selectedArea.coords.svgY}
+                    r={radiusSvgPx}
+                    fill="none"
+                    stroke="#f59e0b"
+                    strokeWidth="2"
+                    strokeDasharray="6 4"
+                    className="animate-pulse"
+                    opacity="0.9"
+                  />
+
+                  {/* Secondary Outer Context Ring */}
+                  <circle
+                    cx={selectedArea.coords.svgX}
+                    cy={selectedArea.coords.svgY}
+                    r={radiusSvgPx + 8}
+                    fill="none"
+                    stroke="#38bdf8"
+                    strokeWidth="1"
+                    strokeDasharray="2 3"
+                    opacity="0.5"
+                  />
+
+                  {/* Center Crosshair Marker */}
+                  <g transform={`translate(${selectedArea.coords.svgX}, ${selectedArea.coords.svgY})`}>
+                    <line x1="-12" y1="0" x2="12" y2="0" stroke="#f59e0b" strokeWidth="2" />
+                    <line x1="0" y1="-12" x2="0" y2="12" stroke="#f59e0b" strokeWidth="2" />
+                    <circle r="4" fill="#f59e0b" stroke="#ffffff" strokeWidth="1.5" />
+                  </g>
+
+                  {/* Floating Boundary Label Badge */}
+                  <g transform={`translate(${selectedArea.coords.svgX}, ${Math.max(25, selectedArea.coords.svgY - radiusSvgPx - 10)})`}>
+                    <rect
+                      x="-70"
+                      y="-12"
+                      width="140"
+                      height="18"
+                      rx="4"
+                      fill="#0f172a"
+                      stroke="#f59e0b"
+                      strokeWidth="1"
+                    />
+                    <text
+                      textAnchor="middle"
+                      y="1"
+                      fill="#fbbf24"
+                      fontSize="9"
+                      fontWeight="bold"
+                      fontFamily="monospace"
+                    >
+                      {selectedRadiusKm}km Context Ring
+                    </text>
+                  </g>
+                </g>
+              )}
+
+              {/* Dynamic Feature Highlight Animation (when user clicks "Show on Map") */}
+              {highlightedFeature && highlightedFeature.coords && (
+                <g transform={`translate(${highlightedFeature.coords.x}, ${highlightedFeature.coords.y})`} pointerEvents="none">
+                  <circle r="35" fill="none" stroke="#06b6d4" strokeWidth="3" strokeDasharray="5 3" className="animate-spin" />
+                  <circle r="50" fill="none" stroke="#38bdf8" strokeWidth="1.5" className="animate-ping" opacity="0.6" />
+                  <rect x="-55" y="-30" width="110" height="18" rx="3" fill="#082f49" stroke="#38bdf8" strokeWidth="1" />
+                  <text textAnchor="middle" y="-18" fill="#e0f2fe" fontSize="9" fontWeight="bold" fontFamily="monospace">
+                    Focused: {highlightedFeature.type.toUpperCase()}
+                  </text>
+                </g>
+              )}
             </svg>
+          </div>
+
+          {/* SECTION 24: MAP LEGEND (Progressive Disclosure) */}
+          <div className="bg-slate-900/90 border-t border-slate-800 p-2.5 text-xs flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center space-x-2">
+              <span className="font-bold text-slate-300 text-[10px] uppercase font-mono tracking-wider">Map Legend:</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5 text-[10px] text-slate-300">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                <span>Surge</span>
+                <span className="text-[8px] text-slate-500 font-mono">(Model)</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+                <span>River Gauge</span>
+                <span className="text-[8px] text-emerald-400 font-mono">(Live CWC)</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-orange-600"></span>
+                <span>Slopes</span>
+                <span className="text-[8px] text-slate-500 font-mono">(DEM)</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>SAR Saturation</span>
+                <span className="text-[8px] text-emerald-400 font-mono">(Sentinel-1)</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span>Lifeline Assets</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-purple-400"></span>
+                <span>Evacuation Roads</span>
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Selected Asset & Vulnerability Inspector */}
-        <div className="lg:col-span-3 space-y-4">
-          {selectedAsset ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-semibold block">
-                    {selectedAsset.criticalityTier}
-                  </span>
-                  <h3 className="text-sm font-bold text-white leading-snug mt-0.5">
-                    {selectedAsset.name}
-                  </h3>
-                </div>
-                <div className={`p-1.5 rounded-lg ${
-                  dynamicSurgeLevel > selectedAsset.finishedFloorElevation
-                    ? 'bg-red-950 text-red-400 border border-red-800'
-                    : 'bg-slate-800 text-emerald-400'
-                }`}>
-                  <Activity className="w-4 h-4" />
-                </div>
-              </div>
+        {/* Right Column: Area Intelligence Inspector OR Asset/Gauge Inspector */}
+        <div className="lg:col-span-4 space-y-4">
+          {/* Top Inspector Tab Switcher */}
+          <div className="bg-slate-900 border border-slate-800 p-1 rounded-xl flex items-center justify-between text-xs">
+            <button
+              id="tab-btn-area-intelligence"
+              onClick={() => setInspectorTab('area_intelligence')}
+              className={`flex-1 py-1.5 px-2 rounded-lg font-bold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+                inspectorTab === 'area_intelligence'
+                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
+            >
+              <MapPin className="w-3.5 h-3.5" />
+              <span>📍 Area Situation</span>
+            </button>
 
-              {/* Elevation & Hydrology Metrics */}
-              <div className="bg-slate-950 p-3 rounded-lg border border-slate-800/80 space-y-2 font-mono text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Ground Elevation:</span>
-                  <span className="text-white font-bold">{selectedAsset.elevationMsl}m {isIndia ? 'GTS MSL' : 'MSL'}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Finished Floor (FFE):</span>
-                  <span className="text-amber-400 font-bold">{selectedAsset.finishedFloorElevation}m {isIndia ? 'GTS MSL' : 'MSL'}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Projected Surge Level:</span>
-                  <span className="text-red-400 font-bold">+{dynamicSurgeLevel.toFixed(1)}m {isIndia ? 'GTS MSL' : 'MSL'}</span>
-                </div>
-                <div className="pt-2 border-t border-slate-800 flex justify-between items-center">
-                  <span className="text-slate-300 font-sans font-semibold">Net Inundation:</span>
-                  <span className={`text-sm font-bold ${
-                    dynamicSurgeLevel > selectedAsset.finishedFloorElevation
-                      ? 'text-red-500 animate-pulse'
-                      : 'text-emerald-400'
-                  }`}>
-                    {dynamicSurgeLevel > selectedAsset.finishedFloorElevation
-                      ? `+${(dynamicSurgeLevel - selectedAsset.finishedFloorElevation).toFixed(2)}m (SUBMERGED)`
-                      : `-${(selectedAsset.finishedFloorElevation - dynamicSurgeLevel).toFixed(2)}m (SAFE FREEBOARD)`}
-                  </span>
-                </div>
-              </div>
+            <button
+              id="tab-btn-asset-inspector"
+              onClick={() => setInspectorTab('asset_inspector')}
+              className={`flex-1 py-1.5 px-2 rounded-lg font-bold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+                inspectorTab === 'asset_inspector'
+                  ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
+            >
+              <Activity className="w-3.5 h-3.5" />
+              <span>{selectedGauge ? '💧 River Gauge' : '🏢 Asset Inspector'}</span>
+            </button>
+          </div>
 
-              {/* Geotechnical Terrain & SAR Data */}
-              <div className="bg-slate-950 p-3 rounded-lg border border-slate-800/80 space-y-1.5 text-xs">
-                <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider block">Terrain & Sentinel-1 Data</span>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Slope Angle:</span>
-                  <span className="text-slate-200 font-mono">{selectedAsset.slopeDegrees}° ({Number(selectedAsset.slopeDegrees) > 20 ? 'High Risk' : 'Low'})</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">SAR Soil Saturation:</span>
-                  <span className="text-emerald-400 font-mono">{((selectedAsset.sarSoilSaturation || 0) * 100).toFixed(0)}%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Asset Replacement:</span>
-                  <span className="text-slate-200 font-mono">{isIndia ? `₹${selectedAsset.structuralValueMillions} Cr` : `$${selectedAsset.structuralValueMillions}M`}</span>
-                </div>
-              </div>
-
-              {/* Blueprint & Circuit Dependency */}
-              <div className="text-xs space-y-1">
-                <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider block">Lifeline Cascading Risk</span>
-                <p className="text-slate-300 text-[11px] leading-relaxed bg-slate-950 p-2.5 rounded border border-slate-800/80">
-                  {selectedAsset.powerDependency}
-                </p>
-              </div>
-
-              {/* Send to AI Auditor CTA */}
-              <button
-                id="btn-audit-selected-asset"
-                onClick={() => onSelectAssetForAudit(selectedAsset)}
-                className="w-full mt-2 py-2.5 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
-              >
-                <span>Run AI Engineering Vulnerability Audit</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </button>
-            </div>
+          {/* Tab 1: Area Intelligence Panel */}
+          {inspectorTab === 'area_intelligence' && areaAnalysis ? (
+            <AreaIntelligencePanel
+              analysis={areaAnalysis}
+              selectedRadiusKm={selectedRadiusKm}
+              onRadiusChange={(r) => {
+                setSelectedRadiusKm(r);
+                if (selectedArea) {
+                  setSelectedArea({ ...selectedArea, radiusKm: r });
+                }
+              }}
+              onHighlightFeature={handleHighlightFeature}
+              onClose={() => setInspectorTab('asset_inspector')}
+              onSelectAssetForAudit={(asset) => {
+                setSelectedAsset(asset);
+                setSelectedGauge(null);
+                onSelectAssetForAudit(asset);
+              }}
+              activeStoryStepIndex={activeStoryStepIndex}
+              onStartStoryMode={() => setActiveStoryStepIndex(0)}
+              onStepStoryMode={(nextIdx) => {
+                setActiveStoryStepIndex(nextIdx);
+                const step = areaAnalysis.storySteps[nextIdx];
+                if (step && step.svgTarget) {
+                  handleHighlightFeature(step.highlightLayer, step.svgTarget);
+                }
+              }}
+              onExitStoryMode={() => setActiveStoryStepIndex(null)}
+            />
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center text-slate-500 text-xs">
-              Click any infrastructure node on the map to inspect its real-time inundation and geotechnical risk.
-            </div>
-          )}
+            /* Tab 2: Single Asset or CWC River Gauge Inspector */
+            <div className="space-y-4">
+              {selectedGauge ? (
+                <div className="bg-slate-900 border border-cyan-800/60 rounded-xl p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 font-semibold block">
+                          {selectedGauge.riverName} River • {selectedGauge.basin.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-bold text-white leading-snug mt-0.5">
+                        {selectedGauge.gaugeName}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] font-mono bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 px-1.5 py-0.5 rounded">
+                          Station: {selectedGauge.stationCode}
+                        </span>
+                        <span className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded border ${
+                          selectedGauge.floodSeverity === 'DANGER'
+                            ? 'bg-red-500/20 text-red-300 border-red-500/40 animate-pulse'
+                            : selectedGauge.floodSeverity === 'WARNING'
+                            ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                            : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        }`}>
+                          {selectedGauge.floodSeverity} STAGE
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setSelectedGauge(null);
+                        if (assets.length > 0) setSelectedAsset(assets[0]);
+                      }}
+                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs"
+                      title="Switch to Infrastructure Assets"
+                    >
+                      ✕
+                    </button>
+                  </div>
 
-          {/* Real-time Road Cutoff Card */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
-              <span>Arterial Evacuation Routes</span>
-              <span className="text-[10px] text-red-400 font-mono">1 Severed</span>
-            </h3>
-
-            <div className="space-y-2">
-              {roads.map((road) => (
-                <div key={road.id} className="p-2 bg-slate-950 rounded border border-slate-800 text-xs flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-slate-200 text-[11px]">{road.name}</div>
-                    <div className="text-[10px] text-slate-400 font-mono">
-                      Min Elev: {road.elevationMin}m • Cutoff: {road.cutoffTimeEtaHours < 5 ? `T-${road.cutoffTimeEtaHours}h` : 'Passable'}
+                  {/* Water Stage Metrics */}
+                  <div className="bg-slate-950 p-3 rounded-lg border border-cyan-900/40 space-y-2 font-mono text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Current Water Stage:</span>
+                      <span className="text-cyan-400 text-sm font-bold">{selectedGauge.waterLevelM.toFixed(2)}m GTS MSL</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Warning Level:</span>
+                      <span className="text-amber-400 font-bold">{selectedGauge.warningLevelM.toFixed(2)}m</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Danger Level:</span>
+                      <span className="text-red-400 font-bold">{selectedGauge.dangerLevelM.toFixed(2)}m</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Record High (HFL):</span>
+                      <span className="text-purple-400 font-bold">{selectedGauge.historicalHighestFloodLevelM.toFixed(2)}m</span>
+                    </div>
+                    <div className="pt-2 border-t border-slate-800/80 flex justify-between items-center">
+                      <span className="text-slate-300 font-sans font-semibold">Stage Differential:</span>
+                      <span className={`text-xs font-bold ${
+                        selectedGauge.waterLevelM >= selectedGauge.dangerLevelM
+                          ? 'text-red-400'
+                          : selectedGauge.waterLevelM >= selectedGauge.warningLevelM
+                          ? 'text-amber-400'
+                          : 'text-emerald-400'
+                      }`}>
+                        {selectedGauge.waterLevelM >= selectedGauge.dangerLevelM
+                          ? `+${(selectedGauge.waterLevelM - selectedGauge.dangerLevelM).toFixed(2)}m ABOVE DANGER`
+                          : `${(selectedGauge.dangerLevelM - selectedGauge.waterLevelM).toFixed(2)}m below danger`}
+                      </span>
                     </div>
                   </div>
-                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
-                    road.status === 'severed' ? 'bg-red-950 text-red-400 border border-red-800' :
-                    road.status === 'contingency_only' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
-                    'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                  }`}>
-                    {road.status.toUpperCase()}
-                  </span>
+
+                  {/* Hydro Discharge & Sluice Gate Control */}
+                  <div className="bg-slate-950 p-3 rounded-lg border border-slate-800/80 space-y-1.5 text-xs">
+                    <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider block">Discharge & Sluice Status</span>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Discharge Rate:</span>
+                      <span className="text-slate-200 font-mono">{selectedGauge.dischargeM3s.toLocaleString()} m³/s</span>
+                    </div>
+                    {selectedGauge.sluiceGateStatus && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Sluice Gates:</span>
+                        <span className="text-amber-300 font-mono text-[11px]">{selectedGauge.sluiceGateStatus.replace(/_/g, ' ')}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Return Period (2-Yr):</span>
+                      <span className="text-slate-300 font-mono">{selectedGauge.returnPeriodThresholds.rp2YearsM}m</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Return Period (50-Yr):</span>
+                      <span className="text-slate-300 font-mono">{selectedGauge.returnPeriodThresholds.rp50YearsM}m</span>
+                    </div>
+                  </div>
+
+                  {/* Official Google Flood Forecasting Gateway Citation */}
+                  <div className="p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-900/60 text-[11px] text-slate-300 space-y-1">
+                    <div className="flex items-center justify-between text-cyan-400 font-semibold text-[10px]">
+                      <span>DATA SOURCE: CWC / GOOGLE FLOOD API</span>
+                      <a
+                        href="https://developers.google.com/flood-forecasting"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="hover:underline flex items-center gap-0.5"
+                      >
+                        Docs <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-snug">
+                      Statutory river stage data via Google Flood Forecasting API (developers.google.com/flood-forecasting) under CWC National Flood Forecasting Initiative.
+                    </p>
+                  </div>
                 </div>
-              ))}
+              ) : selectedAsset ? (
+                <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-semibold block">
+                        {selectedAsset.criticalityTier}
+                      </span>
+                      <h3 className="text-sm font-bold text-white leading-snug mt-0.5">
+                        {selectedAsset.name}
+                      </h3>
+                    </div>
+                    <div className={`p-1.5 rounded-lg ${
+                      dynamicSurgeLevel > selectedAsset.finishedFloorElevation
+                        ? 'bg-red-950 text-red-400 border border-red-800'
+                        : 'bg-slate-800 text-emerald-400'
+                    }`}>
+                      <Activity className="w-4 h-4" />
+                    </div>
+                  </div>
+
+                  {/* Elevation & Hydrology Metrics */}
+                  <div className="bg-slate-950 p-3 rounded-lg border border-slate-800/80 space-y-2 font-mono text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Ground Elevation:</span>
+                      <span className="text-white font-bold">{selectedAsset.elevationMsl}m {isIndia ? 'GTS MSL' : 'MSL'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Finished Floor (FFE):</span>
+                      <span className="text-amber-400 font-bold">{selectedAsset.finishedFloorElevation}m {isIndia ? 'GTS MSL' : 'MSL'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Projected Surge Level:</span>
+                      <span className="text-red-400 font-bold">+{dynamicSurgeLevel.toFixed(1)}m {isIndia ? 'GTS MSL' : 'MSL'}</span>
+                    </div>
+                    <div className="pt-2 border-t border-slate-800 flex justify-between items-center">
+                      <span className="text-slate-300 font-sans font-semibold">Net Inundation:</span>
+                      <span className={`text-sm font-bold ${
+                        dynamicSurgeLevel > selectedAsset.finishedFloorElevation
+                          ? 'text-red-500 animate-pulse'
+                          : 'text-emerald-400'
+                      }`}>
+                        {dynamicSurgeLevel > selectedAsset.finishedFloorElevation
+                          ? `+${(dynamicSurgeLevel - selectedAsset.finishedFloorElevation).toFixed(2)}m (SUBMERGED)`
+                          : `-${(selectedAsset.finishedFloorElevation - dynamicSurgeLevel).toFixed(2)}m (SAFE FREEBOARD)`}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Send to AI Auditor CTA */}
+                  <button
+                    id="btn-audit-selected-asset"
+                    onClick={() => onSelectAssetForAudit(selectedAsset)}
+                    className="w-full mt-2 py-2.5 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+                  >
+                    <span>Run AI Engineering Vulnerability Audit</span>
+                    <ArrowUpRight className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center text-slate-500 text-xs">
+                  Click any infrastructure node or river gauge on the map to inspect.
+                </div>
+              )}
+
+              {/* Real-time Road Cutoff Card */}
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+                  <span>Arterial Evacuation Routes</span>
+                  <span className="text-[10px] text-red-400 font-mono">1 Severed</span>
+                </h3>
+
+                <div className="space-y-2">
+                  {roads.map((road) => (
+                    <div key={road.id} className="p-2 bg-slate-950 rounded border border-slate-800 text-xs flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-slate-200 text-[11px]">{road.name}</div>
+                        <div className="text-[10px] text-slate-400 font-mono">
+                          Min Elev: {road.elevationMin}m • Cutoff: {road.cutoffTimeEtaHours < 5 ? `T-${road.cutoffTimeEtaHours}h` : 'Passable'}
+                        </div>
+                      </div>
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
+                        road.status === 'severed' ? 'bg-red-950 text-red-400 border border-red-800' :
+                        road.status === 'contingency_only' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
+                        'bg-emerald-950 text-emerald-400 border border-emerald-800'
+                      }`}>
+                        {road.status.toUpperCase()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

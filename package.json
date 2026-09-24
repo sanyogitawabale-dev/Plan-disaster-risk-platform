@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "geoshield:audit": "tsx scripts/runGeoshieldAudit.ts"
+    "geoshield:audit": "tsx scripts/runGeoshieldAudit.ts",
+    "geoshield:replay": "tsx scripts/runReplayVerification.ts",
+    "geoshield:public-intel": "tsx scripts/runPublicIntelVerification.ts",
+    "geoshield:area-intel": "tsx scripts/verifyAreaIntelligence.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

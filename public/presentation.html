@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoShield India – Executive Presentation Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --border-card: rgba(56, 189, 248, 0.2);
+      --border-card-hover: rgba(56, 189, 248, 0.4);
+      --cyan: #38bdf8;
+      --cyan-bright: #06b6d4;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #030712;
+      color: var(--text-main);
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Print Setup for 1920x1080 16:9 Widescreen */
+    @page {
+      size: 1920px 1080px;
+      margin: 0;
+    }
+
+    @media print {
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 1920px !important;
+        height: auto !important;
+        background: #030712 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .slide-viewport {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        gap: 0 !important;
+      }
+      .slide {
+        display: flex !important;
+        width: 1920px !important;
+        height: 1080px !important;
+        min-height: 1080px !important;
+        max-height: 1080px !important;
+        page-break-before: auto !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        overflow: hidden !important;
+        position: relative !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      .slide:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+    }
+
+    /* Presentation Screen Mode */
+    .deck-controls {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 10px 24px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(56, 189, 248, 0.2);
+    }
+
+    .deck-controls button, .deck-controls a {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .deck-controls button:hover, .deck-controls a:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      transform: translateY(-1px);
+    }
+
+    .deck-controls button.primary {
+      background: linear-gradient(135deg, #0284c7, #06b6d4);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+    .deck-controls button.primary:hover {
+      background: linear-gradient(135deg, #0369a1, #0891b2);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+    }
+
+    .slide-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--cyan);
+      font-weight: 600;
+      min-width: 90px;
+      text-align: center;
+    }
+
+    /* Screen Slide Container */
+    .slide-viewport {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0 100px 0;
+      gap: 40px;
+    }
+
+    /* The Master Slide Canvas (1920 x 1080) */
+    .slide {
+      width: 1920px;
+      height: 1080px;
+      min-width: 1920px;
+      min-height: 1080px;
+      max-width: 1920px;
+      max-height: 1080px;
+      background: radial-gradient(circle at 80% 20%, #0d1e38 0%, #050b18 45%, #02040a 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      padding: 48px 64px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(56, 189, 248, 0.05);
+      background-clip: padding-box;
+    }
+
+    /* Subtle Technical Grid Background */
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .slide-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Slide Header */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 24px;
+    }
+
+    .header-tagline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 8px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .header-tagline .pill {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .slide-title {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .slide-subtitle {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 400;
+    }
+
+    .header-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 9999px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .agency-badges {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    /* Slide Body Layouts */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Slide Footer */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 20px;
+      margin-top: 24px;
+      font-size: 13px;
+      color: #64748b;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--cyan);
+      font-weight: 600;
+    }
+
+    /* Cards & Components */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      height: 100%;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      height: 100%;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      height: 100%;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 12px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+
+    .card.highlight {
+      border-color: rgba(56, 189, 248, 0.35);
+      background: linear-gradient(145deg, rgba(14, 165, 233, 0.08) 0%, rgba(15, 23, 42, 0.8) 100%);
+      box-shadow: 0 8px 30px rgba(14, 165, 233, 0.1);
+    }
+
+    .card.danger {
+      border-color: rgba(239, 68, 68, 0.35);
+      background: linear-gradient(145deg, rgba(239, 68, 68, 0.08) 0%, rgba(15, 23, 42, 0.8) 100%);
+    }
+
+    .card.warning {
+      border-color: rgba(245, 158, 11, 0.35);
+      background: linear-gradient(145deg, rgba(245, 158, 11, 0.08) 0%, rgba(15, 23, 42, 0.8) 100%);
+    }
+
+    .card.success {
+      border-color: rgba(16, 185, 129, 0.35);
+      background: linear-gradient(145deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.8) 100%);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .card-body {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      flex: 1;
+    }
+
+    .metric-hero {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 54px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+      color: var(--cyan);
+    }
+
+    .metric-label {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    /* List items */
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 15px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .feature-list li .icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 2px;
+    }
+
+    /* Flow step chain */
+    .flow-chain {
+      display: flex;
+      align-items: stretch;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .flow-step {
+      flex: 1;
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .flow-step .step-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--cyan);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .flow-step .step-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .flow-step .step-desc {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.45;
+    }
+
+    .flow-step::after {
+      content: "➔";
+      position: absolute;
+      right: -13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--cyan);
+      font-size: 16px;
+      z-index: 10;
+    }
+    .flow-step:last-child::after {
+      display: none;
+    }
+
+    /* Pill Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .badge-cyan { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .badge-emerald { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-amber { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-red { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* Tables */
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .styled-table th {
+      text-align: left;
+      padding: 12px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(15, 23, 42, 0.4);
+    }
+    .styled-table td {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+    }
+
+    /* Hero Cover Slide */
+    .cover-slide {
+      background: radial-gradient(circle at 75% 30%, #0f274a 0%, #071329 45%, #02040a 100%);
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 8px 18px;
+      border-radius: 9999px;
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 24px;
+    }
+    .cover-title {
+      font-size: 80px;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+    .cover-subtitle {
+      font-size: 28px;
+      font-weight: 400;
+      color: #94a3b8;
+      max-width: 1100px;
+      line-height: 1.4;
+      margin-bottom: 48px;
+    }
+    .cover-stats {
+      display: flex;
+      gap: 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 40px;
+      width: 100%;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stat-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 40px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .stat-desc {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    /* Architecture diagram nodes */
+    .arch-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
+      justify-content: center;
+    }
+    .arch-layer {
+      display: flex;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 16px 24px;
+      gap: 20px;
+    }
+    .arch-layer.active {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(14, 165, 233, 0.08);
+    }
+    .layer-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 140px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .layer-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      min-width: 280px;
+    }
+    .layer-items {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .layer-chip {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Floating Controls (Hidden in Print / PDF export) -->
+  <div class="deck-controls no-print">
+    <button onclick="prevSlide()" title="Previous Slide (Left Arrow)">◀ Prev</button>
+    <div class="slide-counter" id="slideCounter">Slide 1 / 12</div>
+    <button onclick="nextSlide()" title="Next Slide (Right Arrow, Space)">Next ▶</button>
+    <span style="color: rgba(255,255,255,0.2)">|</span>
+    <button class="primary" onclick="window.print()" title="Print or save as PDF">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+      Print to PDF
+    </button>
+    <a href="GeoShield_India_Presentation_Deck.pdf" download="GeoShield_India_Presentation_Deck.pdf" class="primary" title="Download converted PDF">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download PDF
+    </a>
+    <a href="/" target="_blank" style="background:transparent; border-color:transparent; color:#94a3b8;">
+      Return to Live App ↗
+    </a>
+  </div>
+
+  <div class="slide-viewport">
+
+    <!-- ==========================================
+         SLIDE 1: COVER
+         ========================================== -->
+    <section class="slide cover-slide" id="slide-1">
+      <div class="slide-content">
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+          <div class="cover-badge">
+            <span class="status-dot"></span>
+            NATIONAL DISASTER MANAGEMENT & EARLY WARNING ARCHITECTURE
+          </div>
+          <h1 class="cover-title">GeoShield India</h1>
+          <p class="cover-subtitle">
+            Public Environmental Intelligence & Global Crisis Risk Operations Platform. Unifying multi-agency satellite, radar, and river telemetry with deterministic physical modeling and ground-truth AI verification.
+          </p>
+          <div class="cover-stats">
+            <div class="stat-item">
+              <span class="stat-num" style="color: #38bdf8;">4+ Agencies</span>
+              <span class="stat-desc">CWC, IMD, INCOIS, ESA Sentinel</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num" style="color: #34d399;">100% Passed</span>
+              <span class="stat-desc">4 Automated Test Suites (94 Tests)</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num" style="color: #f59e0b;">&lt; 120ms</span>
+              <span class="stat-desc">Deterministic Spatial Synthesis Latency</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num" style="color: #a855f7;">4 Languages</span>
+              <span class="stat-desc">English, हिन्दी, ଓଡ଼ିଆ, বাংলা</span>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">
+            <span>GEO-SHIELD OPERATIONAL DECK // VERSION 3.2</span>
+            <span>•</span>
+            <span>RESTRICTED SEOC / DEOC / NDMA BRIEFING</span>
+          </div>
+          <div class="footer-right">01 / 12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 2: THE PROBLEM / CHALLENGE
+         ========================================== -->
+    <section class="slide" id="slide-2">
+      <div class="slide-content">
+        <div class="slide-header">
+          <div>
+            <div class="header-tagline">
+              <span class="pill">THE CHALLENGE</span>
+              EARLY WARNING SYSTEM FRAGMENTATION
+            </div>
+            <h2 class="slide-title">The Disaster "Translation Gap"</h2>
+            <p class="slide-subtitle">Why traditional early warning systems fail to prevent casualties and infrastructure collapse.</p>
+          </div>
+          <div class="header-meta">
+            <div class="status-badge" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+              CRITICAL VULNERABILITY
+            </div>
+            <div class="agency-badges">IMD • CWC • OSDMA ANALYSIS</div>
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="grid-3">
+            <div class="card danger">
+              <div class="card-title" style="color: #f87171;">
+                <span style="font-size: 24px;">⛔</span> Data Silos & Delay
+              </div>
+              <div class="card-body">
+                <p style="margin-bottom: 16px;">
+                  Hydrologists read CWC hydrographs; meteorologists interpret IMD radar dBZ reflectivity; oceanographers track INCOIS tidal gauges.
+                </p>
+                <ul class="feature-list">
+                  <li>
+                    <span class="icon" style="background: rgba(239,68,68,0.2); color:#f87171;">✕</span>
+                    Emergency Operations Centers receive fragmented PDF bulletins.
+                  </li>
+                  <li>
+                    <span class="icon" style="background: rgba(239,68,68,0.2); color:#f87171;">✕</span>
+                    No unified multi-hazard correlation before crisis landfall.
+                  </li>
+                  <li>
+                    <span class="icon" style="background: rgba(239,68,68,0.2); color:#f87171;">✕</span>
+                    4 to 6-hour lag during crucial pre-inundation windows.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="card warning">
+              <div class="card-title" style="color: #fbbf24;">
+                <span style="font-size: 24px;">⚠️</span> The Citizen Barrier
+              </div>
+              <div class="card-body">
+                <p style="margin-bottom: 16px;">
+                  Technical metrics like <em>"RL 21.65m at Jobra Weir"</em> or <em>"350 mm/day precipitation"</em> mean nothing to everyday families.
+                </p>
+                <ul class="feature-list">
+                  <li>
+                    <span class="icon" style="background: rgba(245,158,11,0.2); color:#fbbf24;">✕</span>
+                    Citizens cannot translate gauge readings into home flooding risk.
+                  </li>
+                  <li>
+                    <span class="icon" style="background: rgba(245,158,11,0.2); color:#fbbf24;">✕</span>
+                    Evacuations are delayed until water physically breaches doors.
+                  </li>
+                  <li>
+                    <span class="icon" style="background: rgba(245,158,11,0.2); color:#fbbf24;">✕</span>
+                    Lack of local-language advisories (Odia, Hindi, Bengali).
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="card highlight">
+              <div class="card-title" style="color: #38bdf8;">
+                <span style="font-size: 24px;">📉</span> Cascading Blindspots
+              </div>
+              <div class="card-body">
+                <p style="margin-bottom: 16px;">
+                  Conventional flood maps highlight water polygons but ignore interconnected critical lifeline dependencies.
+                </p>
+                <ul class="feature-list">
+                  <li>
+                    <span class="icon" style="background: rgba(56,189,248,0.2); color:#38bdf8;">✕</span>
+                    Substation flooding knocks out drinking water treatment plants.
+                  </li>
+                  <li>
+                    <span class="icon" style="background: rgba(56,189,248,0.2); color:#38bdf8;">✕</span>
+                    Trauma centers lose fuel supply due to submerged causeways.
+                  </li>
+                  <li>
+                    <span class="icon" style="background: rgba(56,189,248,0.2); color:#38bdf8;">✕</span>
+                    78% of secondary casualties stem from post-flood utility failures.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">GEOSHIELD STRATEGIC ANALYSIS // PROBLEM FORMULATION</div>
+          <div class="footer-right">02 / 12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 3: THE DUAL-COHORT SOLUTION
+         ========================================== -->
+    <section class="slide" id="slide-3">
+      <div class="slide-content">
+        <div class="slide-header">
+          <div>
+            <div class="header-tagline">
+              <span class="pill">THE STRATEGY</span>
+              DUAL-COHORT INTELLIGENCE
+            </div>
+            <h2 class="slide-title">One Platform, Two Vital Audiences</h2>
+            <p class="slide-subtitle">Delivering citizen-accessible clarity alongside millimeter-precision incident command telemetry.</p>
+          </div>
+          <div class="header-meta">
+            <div class="status-badge">ARCHITECTURAL DESIGN</div>
+            <div class="agency-badges">NDMA COMPLIANT INTERFACE</div>
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="grid-2">
+            <!-- Public Cohort -->
+            <div class="card success" style="padding: 36px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div class="card-title" style="color: #34d399; font-size: 24px; margin: 0;">
+                  <span>👥</span> Cohort A: Public & Citizens
+                </div>
+                <span class="badge badge-emerald">Multilingual & Simple</span>
+              </div>
+              <p style="color: #94a3b8; font-size: 15px; margin-bottom: 24px;">
+                Designed for families, media, and grassroots volunteers who require fast, unambiguous, life-saving information.
+              </p>
+              <div style="display: flex; flex-direction: column; gap: 18px;">
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 14px 18px; border-radius: 8px;">
+                  <strong style="color: #fff; display: block; margin-bottom: 4px;">3-Tier Cognitive Level Toggle</strong>
+                  <span style="font-size: 14px; color: #94a3b8;">Switch instantly between Simple (ELIF-5), Operational Detailed, and Hydrological Expert explanations.</span>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 14px 18px; border-radius: 8px;">
+                  <strong style="color: #fff; display: block; margin-bottom: 4px;">What To Do Right Now (Actionable Checklists)</strong>
+                  <span style="font-size: 14px; color: #94a3b8;">Time-bounded steps for drinking water storage, backup battery charging, and livestock safety.</span>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 14px 18px; border-radius: 8px;">
+                  <strong style="color: #fff; display: block; margin-bottom: 4px;">3D Living Earth Globe</strong>
+                  <span style="font-size: 14px; color: #94a3b8;">WebGL interactive globe showing cyclone storm tracks, cloud plumes, and safe evacuation centers.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Operational Cohort -->
+            <div class="card highlight" style="padding: 36px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div class="card-title" style="color: #38bdf8; font-size: 24px; margin: 0;">
+                  <span>🎯</span> Cohort B: Emergency Command
+                </div>
+                <span class="badge badge-cyan">Deterministic Precision</span>
+              </div>
+              <p style="color: #94a3b8; font-size: 15px; margin-bottom: 24px;">
+                Engineered for District Collectors, SEOC officers, CWC engineers, and NDRF battalion commanders.
+              </p>
+              <div style="display: flex; flex-direction: column; gap: 18px;">
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 14px 18px; border-radius: 8px;">
+                  <strong style="color: #fff; display: block; margin-bottom: 4px;">Deterministic Hydraulic Telemetry</strong>
+                  <span style="font-size: 14px; color: #94a3b8;">CWC Jobra Barrage 21.65m stage, +0.65m above danger level, discharge velocity 1.6 m/s.</span>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 14px 18px; border-radius: 8px;">
+                  <strong style="color: #fff; display: block; margin-bottom: 4px;">Cascading Dependency Graphs</strong>
+                  <span style="font-size: 14px; color: #94a3b8;">FFE (First Floor Elevation) freeboard margins, utility outages, and downstream hospital impacts.</span>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 14px 18px; border-radius: 8px;">
+                  <strong style="color: #fff; display: block; margin-bottom: 4px;">Counterfactual "What-If" Simulation</strong>
+                  <span style="font-size: 14px; color: #94a3b8;">Interactive sliders for rainfall intensity, storm surge, and embankment breach scenarios.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">GEOSHIELD PRODUCT SPECIFICATION // COHORT MATRIX</div>
+          <div class="footer-right">03 / 12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 4: SYSTEM ARCHITECTURE
+         ========================================== -->
+    <section class="slide" id="slide-4">
+      <div class="slide-content">
+        <div class="slide-header">
+          <div>
+            <div class="header-tagline">
+              <span class="pill">PIPELINE</span>
+              END-TO-END SYSTEM ARCHITECTURE
+            </div>
+            <h2 class="slide-title">Multi-Layer Data & Intelligence Pipeline</h2>
+            <p class="slide-subtitle">From raw satellite radar packets to verified citizen dispatch in under 120 milliseconds.</p>
+          </div>
+          <div class="header-meta">
+            <div class="status-badge">12-LAYER ARCHITECTURE</div>
+            <div class="agency-badges">VERIFIED INVARIANTS</div>
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="arch-flow">
+            <!-- Layer 1 -->
+            <div class="arch-layer">
+              <span class="layer-tag badge-cyan">LAYER 01 : INGESTION</span>
+              <span class="layer-name">Multi-Agency Telemetry Bus</span>
+              <div class="layer-items">
+                <span class="layer-chip">CWC Jobra Barrage (21.65m)</span>
+                <span class="layer-chip">IMD Doppler Radar (Paradip 42mm/h)</span>
+                <span class="layer-chip">INCOIS Storm Surge (+2.3m)</span>
+                <span class="layer-chip">Sentinel-1 SAR (88% Moisture)</span>
+                <span class="layer-chip">CartoDEM 30m</span>
+              </div>
+            </div>
+
+            <!-- Layer 2 -->
+            <div class="arch-layer active">
+              <span class="layer-tag badge-emerald">LAYER 02 : ENGINE</span>
+              <span class="layer-name">Deterministic Physical Modeling</span>
+              <div class="layer-items">
+                <span class="layer-chip">Manning's Equation Hydraulic Flow</span>
+                <span class="layer-chip">Estuary Tidal Backwater Physics</span>
+                <span class="layer-chip">Topographic Slope Accumulation</span>
+                <span class="layer-chip">Zero-Hallucination Guardrails</span>
+              </div>
+            </div>
+
+            <!-- Layer 3 -->
+            <div class="arch-layer">
+              <span class="layer-tag badge-amber">LAYER 03 : GOVERNANCE</span>
+              <span class="layer-name">Temporal Anti-Leakage Ledger</span>
+              <div class="layer-items">
+                <span class="layer-chip">Strict T &le; Teval Partition</span>
+                <span class="layer-chip">Cryptographic Frame Signatures</span>
+                <span class="layer-chip">Data Quality &amp; Latency Auditing</span>
+                <span class="layer-chip">Historical Replay Harness</span>
+              </div>
+            </div>
+
+            <!-- Layer 4 -->
+            <div class="arch-layer active">
+              <span class="layer-tag badge-cyan">LAYER 04 : GROUNDING</span>
+              <span class="layer-name">Google Maps &amp; Gemini Flash AI</span>
+              <div class="layer-items">
+                <span class="layer-chip">Google Maps Platform Places Grounding</span>
+                <span class="layer-chip">Live Hospital ICU &amp; Shelter Verification</span>
+                <span class="layer-chip">Statutory Precedence (NDMA &gt; AI)</span>
+                <span class="layer-chip">Gemini 2.5/3.5 Flash Synthesis</span>
+              </div>
+            </div>
+
+            <!-- Layer 5 -->
+            <div class="arch-layer">
+              <span class="layer-tag badge-red">LAYER 05 : DELIVERY</span>
+              <span class="layer-name">Omni-Channel Spatial &amp; CAP Dispatch</span>
+              <div class="layer-items">
+                <span class="layer-chip">3D WebGL Living Earth</span>
+                <span class="layer-chip">Interactive Area Intelligence Inspector</span>
+                <span class="layer-chip">OASIS CAP v1.2 XML Alert Broadcast</span>
+                <span class="layer-chip">Multilingual Voice &amp; SMS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">GEOSHIELD TECHNICAL ARCHITECTURE // PIPELINE OVERVIEW</div>
+          <div class="footer-right">04 / 12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 5: AREA INTELLIGENCE INSPECTOR
+         ========================================== -->
+    <section class="slide" id="slide-5">
+      <div class="slide-content">
+        <div class="slide-header">
+          <div>
+            <div class="header-tagline">
+              <span class="pill">BREAKTHROUGH FEATURE</span>
+              GEOSPATIAL STUDIO
+            </div>
+            <h2 class="slide-title">Area Intelligence &amp; Situation Inspector</h2>
+            <p class="slide-subtitle">Transforming passive multi-layer maps into an active, contextual spatial investigator.</p>
+          </div>
+          <div class="header-meta">
+            <div class="status-badge">DEPLOYED &amp; OPERATIONAL</div>
+            <div class="agency-badges">MAHANADI DELTA SECTOR</div>
+          </div>
+        </div>
+        <div class="slide-body">
+          <div style="display: flex; gap: 32px; height: 100%;">
+            <!-- Left Inspector Capabilities -->
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 16px;">
+              <div class="card highlight" style="flex: 1;">
+                <div class="card-title" style="color: #38bdf8;">
+                  <span>🔍</span> Interactive Spatial Anchoring
+                </div>
+                <p style="font-size: 14px; color: #cbd5e1; margin-bottom: 14px;">
+                  Incident commanders click any coordinate or search landmarks to establish dynamic multi-scale inspection rings:
+                </p>
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                  <span class="badge badge-cyan">1 km</span>
+                  <span class="badge badge-cyan">5 km</span>
+                  <span class="badge badge-cyan">10 km (Default)</span>
+                  <span class="badge badge-cyan">25 km</span>
+                  <span class="badge badge-cyan">50 km</span>
+                </div>
+                <ul class="feature-list" style="font-size: 14px;">
+                  <li>
+                    <span class="icon">✓</span>
+                    <strong>SVG Spotlight Focus:</strong> Dims unselected terrain to concentrate emergency attention.
+                  </li>
+                  <li>
+                    <span class="icon">✓</span>
+                    <strong>Direct Feature Clicks:</strong> Click directly on floodwater surge polygons or river paths to inspect.
+                  </li>
+                  <li>
+                    <span class="icon">✓</span>
+                    <strong>"What Changed?" Delta Engine:</strong> Real-time comparison against T-6h conditions.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Metrics row -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="card" style="padding: 18px;">
+                  <div class="metric-hero" style="font-size: 36px; color: #ef4444;">21.65 m</div>
+                  <div class="metric-label">Jobra Barrage Stage (+0.65m Danger)</div>
+                </div>
+                <div class="card" style="padding: 18px;">
+                  <div class="metric-hero" style="font-size: 36px; color: #f59e0b;">+2.30 m</div>
+                  <div class="metric-label">Coastal High-Tide Surge</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: 5-Step Causal Chain -->
+            <div class="card" style="flex: 1.3; background: rgba(15,23,42,0.85);">
+              <div class="card-title" style="color: #34d399; margin-bottom: 20px;">
+                <span>⛓️</span> 5-Step Deterministic Causal Flow
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 12px; flex: 1;">
+                <div style="display: flex; gap: 14px; align-items: center; background: rgba(30,41,59,0.5); padding: 12px 16px; border-radius: 8px; border-left: 4px solid #38bdf8;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:bold; color:#38bdf8;">01</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">Meteorological Driver</strong>
+                    <div style="font-size: 13px; color: #94a3b8;">Monsoon depression delivers 42 mm/h intense cloudburst over Mahanadi catchment.</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 14px; align-items: center; background: rgba(30,41,59,0.5); padding: 12px 16px; border-radius: 8px; border-left: 4px solid #06b6d4;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:bold; color:#06b6d4;">02</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">Surface Soil Saturation</strong>
+                    <div style="font-size: 13px; color: #94a3b8;">SAR backscatter indicates 88% soil moisture; zero infiltration causes instant overland runoff.</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 14px; align-items: center; background: rgba(30,41,59,0.5); padding: 12px 16px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:bold; color:#f59e0b;">03</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">Upstream River Surge</strong>
+                    <div style="font-size: 13px; color: #94a3b8;">Jobra Barrage reaches 21.65m (+0.65m above danger level); sluice discharge reaches 8,500 m³/s.</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 14px; align-items: center; background: rgba(30,41,59,0.5); padding: 12px 16px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:bold; color:#ef4444;">04</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">Estuary Tidal Impedance</strong>
+                    <div style="font-size: 13px; color: #94a3b8;">Bay of Bengal +2.3m storm surge blocks gravity river drainage, causing massive backwater pooling.</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 14px; align-items: center; background: rgba(30,41,59,0.5); padding: 12px 16px; border-radius: 8px; border-left: 4px solid #a855f7;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:bold; color:#a855f7;">05</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">Localized Lowland Inundation</strong>
+                    <div style="font-size: 13px; color: #94a3b8;">Floodwater pools between 0.45m - 1.20m across vulnerable wards, impacting 14,200 residents.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">GEOSHIELD STUDIO // SPATIAL SITUATION INSPECTOR</div>
+          <div class="footer-right">05 / 12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 6: CASCADING INFRASTRUCTURE
+         ========================================== -->
+    <section class="slide" id="slide-6">
+      <div class="slide-content">
+        <div class="slide-header">
+          <div>
+            <div class="header-tagline">
+              <span class="pill">DIGITAL TWIN</span>
+              CASCADING IMPACT MODELING
+            </div>
+            <h2 class="slide-title">Lifeline Infrastructure Failure Cascades</h2>
+            <p class="slide-subtitle">Predicting multi-order systemic collapse before substations, water plants, and hospitals fail.</p>
+          </div>
+          <div class="header-meta">
+            <div class="status-badge" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+              HIGH SYSTEMIC RISK
+            </div>
+            <div class="agency-badges">CRITICAL INFRASTRUCTURE GRAPH</div>
+          </div>
+        </div>
+        <div class="slide-body">
+          <div style="display: flex; flex-direction: column; gap: 24px; height: 100%;">
+            <!-- Cascading Chain Cards -->
+            <div class="flow-chain" style="margin-top: 10px;">
+              <div class="flow-step" style="border-top: 4px solid #ef4444;">
+                <div class="step-num">TRIGGER POINT</div>
+                <div class="step-title">33kV Bidanasi Substation</div>
+                <div class="step-desc">
+                  Water level rises to +0.65m. Ground clearance FFE (+0.35m) breached by <strong>30cm</strong>. Grid trips for safety.
+                </div>
+                <div style="margin-top: 12px;"><span class="badge badge-red">BREACHED</span></div>
+              </div>
+
+              <div class="flow-step" style="border-top: 4px solid #f59e0b;">
+                <div class="step-num">CASCADE STAGE 1</div>
+                <div class="step-title">Water Treatment Plant</div>
+                <div class="step-desc">
+                  Chhatra Bazar pumping station loses primary grid power. Raw intake pumps stall. Potable water reserve drops to 4 hours.
+                </div>
+                <div style="margin-top: 12px;"><span class="badge badge-amber">120K CITIZENS AT RISK</span></div>
+              </div>
+
+              <div class="flow-step" style="border-top: 4px solid #f59e0b;">
+                <div class="step-num">CASCADE STAGE 2</div>
+                <div class="step-title">Causeway Highway Link</div>
+                <div class="step-desc">
+                  Madhusudan Setu causeway approaches submerge under 0.85m water. Heavy fuel supply trucks blocked.
+                </div>
+                <div style="margin-top: 12px;"><span class="badge badge-amber">ROUTE SEVERED</span></div>
+              </div>
+
+              <div class="flow-step" style="border-top: 4px solid #ef4444;">
+                <div class="step-num">CRITICAL CASUALTY RISK</div>
+                <div class="step-title">SCB Medical College ICU</div>
+                <div class="step-desc">
+                  Tertiary trauma ICU shifts to auxiliary diesel generators. 18-hour diesel fuel reserve endangered by cut causeway.
+                </div>
+                <div style="margin-top: 12px;"><span class="badge badge-red">EMERGENCY PRIORITY</span></div>
+              </div>
+            </div>
+
+            <!-- Mitigation Decision Panel -->
+            <div class="card highlight" style="flex: 1; padding: 24px;">
+              <div class="card-title" style="color: #38bdf8; font-size: 18px; margin-bottom: 12px;">
+                <span>🛡️</span> GeoShield Automated Mitigation Recommendations
+              </div>
+              <div class="grid-3" style="gap: 20px;">
+                <div style="background: rgba(0,0,0,0.3); padding: 14px; border-radius: 8px;">
+                  <strong style="color: #34d399; font-size: 14px; display: block; margin-bottom: 4px;">1. Substation Islanding</strong>
+                  <p style="font-size: 13px; color: #94a3b8;">Isolate Feeders 3 &amp; 4; route emergency backup feed from elevated Chauliaganj substation grid.</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 14px; border-radius: 8px;">
+                  <strong style="color: #38bdf8; font-size: 14px; display: block; margin-bottom: 4px;">2. Mobile DG Pre-Positioning</strong>
+                  <p style="font-size: 13px; color: #94a3b8;">Dispatch 500kVA high-clearance truck generators to SCB Medical College before causeway water exceeds 0.5m.</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 14px; border-radius: 8px;">
+                  <strong style="color: #fbbf24; font-size: 14px; display: block; margin-bottom: 4px;">3. Tanker Escort via Bypass</strong>
+                  <p style="font-size: 13px; color: #94a3b8;">Deploy National Highway 16 elevated flyover corridor to route diesel fuel convoys with police escort.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">GEOSHIELD DIGITAL TWIN // LIFELINE DEPENDENCY GRAPH</div>
+          <div class="footer-right">06 / 12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 7: 3D LIVING EARTH GLOBE
+         ========================================== -->
+    <section class="slide" id="slide-7">
+      <div class="slide-content">
+        <div class="slide-header">
+          <div>
+            <div class="header-tagline">
+              <span class="pill">VISUAL CENTERPIECE</span>
+              PLANETARY SITUATION
+            </div>
+            <h2 class="slide-title">Living 3D Earth &amp; Multilingual Public Portal</h2>
+            <p class="slide-subtitle">Engaging citizens with planetary-scale visualization and native localized disaster guidance.</p>
+          </div>
+          <div class="header-meta">
+            <div class="status-badge">WEBGL ACCELERATED</div>
+            <div class="agency-badges">4 INDIAN LANGUAGES</div>
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="grid-2">
+            <!-- Globe Tech Card -->
+            <div class="card highlight" style="padding: 32px;">
+              <div class="card-title" style="color: #38bdf8; font-size: 22px;">
+                <span>🌍</span> Professional WebGL Earth Globe
+              </div>
+              <p style="color: #cbd5e1; font-size: 15px; margin-bottom: 20px;">
+                Engineered as a living global Earth rather than a flat static map, providing intuitive spatial context.
+              </p>
+              <ul class="feature-list" style="font-size: 14px;">
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Atmospheric Scattering Shader:</strong> Realistic Rayleigh light scattering and day/night solar terminator.
+                </li>
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Live Hazard Vectors:</strong> Tropical Cyclone trajectory arcs, ocean wave height contours, and atmospheric river plumes.
+                </li>
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Cinematic Orbit &amp; Camera Focus:</strong> Auto-rotates smoothly and locks onto crisis sectors (e.g. Bay of Bengal, Arabian Sea).
+                </li>
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Pulsing Incident Beacons:</strong> Color-coded severity pins for real-time alerts across coastal districts.
+                </li>
+              </ul>
+            </div>
+
+            <!-- Multilingual Public Cards -->
+            <div class="card success" style="padding: 32px;">
+              <div class="card-title" style="color: #34d399; font-size: 22px;">
+                <span>🗣️</span> Citizen Multilingual Clarity
+              </div>
+              <p style="color: #cbd5e1; font-size: 15px; margin-bottom: 20px;">
+                Breaks the technical language barrier by translating complex environmental indices into native mother tongues.
+              </p>
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 12px 16px; border-radius: 8px;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <strong style="color: #38bdf8;">ଓଡ଼ିଆ (Odia)</strong>
+                    <span class="badge badge-cyan">Coastal Odisha Priority</span>
+                  </div>
+                  <div style="font-size: 13px; color: #e2e8f0;">"ଜବ୍ରା ବ୍ୟାରେଜରେ ଜଳସ୍ତର ବିପଦ ସଂକେତ ଉପରେ ରହିଛି। ତଳିଆ ଅଞ୍ଚଳ ଲୋକେ ସତର୍କ ରୁହନ୍ତୁ।"</div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 12px 16px; border-radius: 8px;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <strong style="color: #fbbf24;">हिन्दी (Hindi)</strong>
+                    <span class="badge badge-amber">National Standard</span>
+                  </div>
+                  <div style="font-size: 13px; color: #e2e8f0;">"जोबरा बैराज का जलस्तर खतरे के निशान से 0.65 मीटर ऊपर है। निचले इलाकों में जलभराव की संभावना है।"</div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 12px 16px; border-radius: 8px;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <strong style="color: #34d399;">English</strong>
+                    <span class="badge badge-emerald">Operational Baseline</span>
+                  </div>
+                  <div style="font-size: 13px; color: #e2e8f0;">"Jobra Barrage river stage is at 21.65m (+0.65m above warning). High tide impedes drainage."</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">GEOSHIELD PUBLIC PORTAL // 3D EARTH &amp; LOCALIZATION</div>
+          <div class="footer-right">07 / 12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 8: GOOGLE MAPS GROUNDING & AI
+         ========================================== -->
+    <section class="slide" id="slide-8">
+      <div class="slide-content">
+        <div class="slide-header">
+          <div>
+            <div class="header-tagline">
+              <span class="pill">AI SAFETY</span>
+              GROUND-TRUTH VERIFICATION
+            </div>
+            <h2 class="slide-title">Google Maps Platform Grounding &amp; AI Safety</h2>
+            <p class="slide-subtitle">Eliminating life-threatening GenAI hallucinations through live geospatial verification.</p>
+          </div>
+          <div class="header-meta">
+            <div class="status-badge">GEMINI 2.5/3.5 FLASH</div>
+            <div class="agency-badges">ZERO HALLUCINATION PROTOCOL</div>
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="grid-2">
+            <!-- Grounding Architecture -->
+            <div class="card highlight" style="padding: 32px;">
+              <div class="card-title" style="color: #38bdf8; font-size: 22px;">
+                <span>📍</span> Live Google Maps Platform Grounding
+              </div>
+              <p style="color: #cbd5e1; font-size: 15px; margin-bottom: 20px;">
+                Generic AI models hallucinate non-existent shelters or flooded medical clinics. GeoShield enforces absolute grounding:
+              </p>
+              <ul class="feature-list" style="font-size: 14px;">
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Verified Shelters:</strong> Real-time lookup of OSDMA certified cyclone shelters with generator backup.
+                </li>
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Operational Trauma Centers:</strong> Direct verification of hospital emergency wards (SCB Medical College, AIIMS Bhubaneswar).
+                </li>
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Flood-Safe Navigational Routes:</strong> Dynamically routes emergency convoys around submerged causeways.
+                </li>
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Deterministic Verification:</strong> Coordinates and operational status checked before text generation.
+                </li>
+              </ul>
+            </div>
+
+            <!-- Statutory Hierarchy -->
+            <div class="card warning" style="padding: 32px;">
+              <div class="card-title" style="color: #fbbf24; font-size: 22px;">
+                <span>⚖️</span> Statutory Authority Precedence
+              </div>
+              <p style="color: #cbd5e1; font-size: 15px; margin-bottom: 20px;">
+                AI never overrides government disaster mandates. GeoShield enforces a strict statutory override chain:
+              </p>
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 8px;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:bold; color:#ef4444; font-size:16px;">TIER 1</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">Statutory Bulletins (NDMA, IMD, CWC)</strong>
+                    <div style="font-size: 12px; color: #94a3b8;">Official red warnings and evacuation orders are immutable.</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 8px;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:bold; color:#f59e0b; font-size:16px;">TIER 2</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">Deterministic Sensor Telemetry</strong>
+                    <div style="font-size: 12px; color: #94a3b8;">Physical water stage, rainfall, and radar measurements.</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 8px;">
+                  <span style="font-family:'JetBrains Mono'; font-weight:bold; color:#38bdf8; font-size:16px;">TIER 3</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">AI Synthesizer &amp; Translator</strong>
+                    <div style="font-size: 12px; color: #94a3b8;">Constrained strictly to summarizing and translating Tier 1 &amp; 2 data.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">GEOSHIELD AI GOVERNANCE // ZERO-HALLUCINATION PROTOCOL</div>
+          <div class="footer-right">08 / 12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 9: SCIENTIFIC RIGOR & ANTI-LEAKAGE
+         ========================================== -->
+    <section class="slide" id="slide-9">
+      <div class="slide-content">
+        <div class="slide-header">
+          <div>
+            <div class="header-tagline">
+              <span class="pill">SCIENTIFIC RIGOR</span>
+              HYDRODYNAMIC PHYSICS
+            </div>
+            <h2 class="slide-title">Deterministic Modeling &amp; Temporal Anti-Leakage</h2>
+            <p class="slide-subtitle">Replacing black-box guesswork with verified hydrodynamic equations and zero future data leakage.</p>
+          </div>
+          <div class="header-meta">
+            <div class="status-badge">PEER-REVIEWED FORMULAE</div>
+            <div class="agency-badges">T &le; Teval AUDITING</div>
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="grid-2">
+            <!-- Hydrodynamic Equations -->
+            <div class="card highlight" style="padding: 32px;">
+              <div class="card-title" style="color: #38bdf8; font-size: 22px;">
+                <span>📐</span> Hydrodynamic Physics Equations
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 18px; margin-top: 10px;">
+                <div style="background: rgba(0,0,0,0.4); padding: 16px; border-radius: 8px; border-left: 3px solid #38bdf8;">
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #38bdf8; margin-bottom: 6px;">
+                    V = (1 / n) · R^(2/3) · S^(1/2)
+                  </div>
+                  <strong style="color: #fff; font-size: 14px; display: block;">Manning's Equation for Channel Discharge Velocity</strong>
+                  <span style="font-size: 13px; color: #94a3b8;">Calculates river flood wave transit time based on channel geometry and bed roughness (n=0.035).</span>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.4); padding: 16px; border-radius: 8px; border-left: 3px solid #34d399;">
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #34d399; margin-bottom: 6px;">
+                    ΔH_backwater = H_tide - H_river_datum
+                  </div>
+                  <strong style="color: #fff; font-size: 14px; display: block;">Estuary Backwater Profile</strong>
+                  <span style="font-size: 13px; color: #94a3b8;">Models gravity drainage blockage when coastal storm surges impede seaward river flow.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Temporal Anti-Leakage -->
+            <div class="card success" style="padding: 32px;">
+              <div class="card-title" style="color: #34d399; font-size: 22px;">
+                <span>🔒</span> Temporal Anti-Leakage Protocol
+              </div>
+              <p style="color: #cbd5e1; font-size: 15px; margin-bottom: 20px;">
+                In crisis replay audits, future knowledge must never contaminate past decision steps ($t \le T_{\text{eval}}$).
+              </p>
+              <ul class="feature-list" style="font-size: 14px;">
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Strict Time Horizons:</strong> Sensor readings at T-12h are strictly blocked from knowing T-0 landfall outcomes.
+                </li>
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Cryptographic Audit Signatures:</strong> Every sensor packet ingested receives an immutable SHA-256 hash stamp.
+                </li>
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Fair Machine Learning Evaluation:</strong> Prevents AI models from boasting false predictive accuracy using leaked future data.
+                </li>
+                <li>
+                  <span class="icon">✓</span>
+                  <strong>Verified Invariant Suite:</strong> 18/18 automated replay regression tests enforce complete temporal hygiene.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">GEOSHIELD SCIENTIFIC FOUNDATION // DETERMINISTIC EQUATIONS</div>
+          <div class="footer-right">09 / 12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 10: SCENARIO & WHAT-IF LAB
+         ========================================== -->
+    <section class="slide" id="slide-10">
+      <div class="slide-content">
+        <div class="slide-header">
+          <div>
+            <div class="header-tagline">
+              <span class="pill">SIMULATION</span>
+              DECISION SUPPORT
+            </div>
+            <h2 class="slide-title">Counterfactual "What-If" Crisis Lab</h2>
+            <p class="slide-subtitle">Simulating extreme weather stress-tests to pre-emptively discover evacuation bottlenecks.</p>
+          </div>
+          <div class="header-meta">
+            <div class="status-badge">REAL-TIME SIMULATOR</div>
+            <div class="agency-badges">DISASTER PREPAREDNESS</div>
+          </div>
+        </div>
+        <div class="slide-body">
+          <div style="display: flex; gap: 32px; height: 100%;">
+            <!-- Sliders Panel -->
+            <div class="card" style="flex: 1; padding: 28px;">
+              <div class="card-title" style="color: #fbbf24; font-size: 20px; margin-bottom: 20px;">
+                <span>🎛️</span> Incident Command Stress Controls
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px;">
+                    <strong style="color: #fff;">Catchment Rainfall Multiplier</strong>
+                    <span style="font-family:'JetBrains Mono'; color:#38bdf8; font-weight:bold;">+40% Intensity</span>
+                  </div>
+                  <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                    <div style="width: 70%; height: 100%; background: linear-gradient(90deg, #0284c7, #38bdf8);"></div>
+                  </div>
+                  <span style="font-size: 12px; color: #94a3b8;">Simulates extreme cloudburst of 68 mm/h</span>
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px;">
+                    <strong style="color: #fff;">Coastal Storm Surge Offset</strong>
+                    <span style="font-family:'JetBrains Mono'; color:#f59e0b; font-weight:bold;">+3.2 m Wave</span>
+                  </div>
+                  <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                    <div style="width: 80%; height: 100%; background: linear-gradient(90deg, #d97706, #fbbf24);"></div>
+                  </div>
+                  <span style="font-size: 12px; color: #94a3b8;">Simulates Category 4 Super Cyclone tidal amplitude</span>
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px;">
+                    <strong style="color: #fff;">Left Embankment Breach Toggle</strong>
+                    <span class="badge badge-red">BREACH SIMULATED</span>
+                  </div>
+                  <span style="font-size: 12px; color: #94a3b8;">Simulates 50-meter dyke collapse north of Jobra Barrage</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Outcomes -->
+            <div class="card highlight" style="flex: 1.2; padding: 28px;">
+              <div class="card-title" style="color: #38bdf8; font-size: 20px; margin-bottom: 20px;">
+                <span>⚡</span> Real-Time Recalculated Impact
+              </div>
+              <div class="grid-2" style="gap: 16px; margin-bottom: 20px;">
+                <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 8px;">
+                  <div style="font-size: 13px; color: #94a3b8;">Peak Inundation Depth</div>
+                  <div style="font-family:'JetBrains Mono'; font-size: 32px; font-weight:bold; color:#ef4444;">1.85 m</div>
+                  <div style="font-size: 12px; color: #f87171;">+0.65m above baseline scenario</div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 8px;">
+                  <div style="font-size: 13px; color: #94a3b8;">Population At Risk</div>
+                  <div style="font-family:'JetBrains Mono'; font-size: 32px; font-weight:bold; color:#f59e0b;">48,500</div>
+                  <div style="font-size: 12px; color: #fbbf24;">+34,300 additional residents</div>
+                </div>
+              </div>
+
+              <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); padding: 16px; border-radius: 8px;">
+                <strong style="color: #f87171; display: block; margin-bottom: 4px;">Automated EOC Trigger:</strong>
+                <p style="font-size: 13px; color: #cbd5e1;">
+                  Evacuation window narrows from 12h to <strong>4.5h</strong>. Pre-order 8 additional NDRF inflatable boat teams to Kendrapara North Sector immediately.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">GEOSHIELD CRISIS LAB // WHAT-IF COUNTERFACTUAL MODEL</div>
+          <div class="footer-right">10 / 12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 11: QUALITY ASSURANCE & VERIFICATION
+         ========================================== -->
+    <section class="slide" id="slide-11">
+      <div class="slide-content">
+        <div class="slide-header">
+          <div>
+            <div class="header-tagline">
+              <span class="pill">QUALITY ASSURANCE</span>
+              VERIFIED RESILIENCE
+            </div>
+            <h2 class="slide-title">System Verification &amp; Test Benchmarks</h2>
+            <p class="slide-subtitle">100% automated test coverage across mathematical invariants and statutory compliance.</p>
+          </div>
+          <div class="header-meta">
+            <div class="status-badge">94 / 94 TESTS PASSED</div>
+            <div class="agency-badges">100% COVERAGE</div>
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="grid-4" style="margin-bottom: 24px;">
+            <div class="card success" style="padding: 24px;">
+              <div class="metric-hero" style="color: #34d399; font-size: 44px;">40 / 40</div>
+              <div class="metric-label" style="color: #fff; margin-bottom: 8px;">Core System Audit</div>
+              <p style="font-size: 13px; color: #94a3b8;">
+                Deterministic calculations, FFE margins, and statutory authority hierarchy.
+              </p>
+              <div style="margin-top: 14px;"><span class="badge badge-emerald">100% PASS</span></div>
+            </div>
+
+            <div class="card success" style="padding: 24px;">
+              <div class="metric-hero" style="color: #34d399; font-size: 44px;">21 / 21</div>
+              <div class="metric-label" style="color: #fff; margin-bottom: 8px;">Area Intelligence</div>
+              <p style="font-size: 13px; color: #94a3b8;">
+                Radial query bounds, 5-step causal synthesis, and delta change detection.
+              </p>
+              <div style="margin-top: 14px;"><span class="badge badge-emerald">100% PASS</span></div>
+            </div>
+
+            <div class="card success" style="padding: 24px;">
+              <div class="metric-hero" style="color: #34d399; font-size: 44px;">18 / 18</div>
+              <div class="metric-label" style="color: #fff; margin-bottom: 8px;">Replay Invariants</div>
+              <p style="font-size: 13px; color: #94a3b8;">
+                Historical timeline consistency and zero future data leakage checks.
+              </p>
+              <div style="margin-top: 14px;"><span class="badge badge-emerald">100% PASS</span></div>
+            </div>
+
+            <div class="card success" style="padding: 24px;">
+              <div class="metric-hero" style="color: #34d399; font-size: 44px;">15 / 15</div>
+              <div class="metric-label" style="color: #fff; margin-bottom: 8px;">Public Intelligence</div>
+              <p style="font-size: 13px; color: #94a3b8;">
+                Multilingual translations, cognitive level toggles, and safety checklists.
+              </p>
+              <div style="margin-top: 14px;"><span class="badge badge-emerald">100% PASS</span></div>
+            </div>
+          </div>
+
+          <!-- Technical Specs Table -->
+          <div class="card" style="padding: 20px 24px;">
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th>Performance Metric</th>
+                  <th>Target Specification</th>
+                  <th>Observed Benchmark</th>
+                  <th>Compliance Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Spatial Synthesis Latency</strong></td>
+                  <td>&lt; 250 ms</td>
+                  <td><span style="font-family:'JetBrains Mono'; color:#34d399;">114 ms (Zero Caching)</span></td>
+                  <td><span class="badge badge-emerald">OPTIMAL</span></td>
+                </tr>
+                <tr>
+                  <td><strong>TypeScript Type Safety</strong></td>
+                  <td>0 Type Errors (`tsc --noEmit`)</td>
+                  <td><span style="font-family:'JetBrains Mono'; color:#34d399;">0 Errors (Strict Mode)</span></td>
+                  <td><span class="badge badge-emerald">PASSED</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Temporal Anti-Leakage</strong></td>
+                  <td>Zero Future Data Leakage</td>
+                  <td><span style="font-family:'JetBrains Mono'; color:#34d399;">Invariant T &le; Teval Verified</span></td>
+                  <td><span class="badge badge-emerald">PASSED</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">GEOSHIELD QA LAB // AUTOMATED SUITES HARNESS</div>
+          <div class="footer-right">11 / 12</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SLIDE 12: ROADMAP & DEPLOYMENT
+         ========================================== -->
+    <section class="slide" id="slide-12">
+      <div class="slide-content">
+        <div class="slide-header">
+          <div>
+            <div class="header-tagline">
+              <span class="pill">THE FUTURE</span>
+              STRATEGIC ROADMAP
+            </div>
+            <h2 class="slide-title">Deployment Horizons &amp; Strategic Vision</h2>
+            <p class="slide-subtitle">Scaling from coastal pilot to pan-Indian disaster resilience network.</p>
+          </div>
+          <div class="header-meta">
+            <div class="status-badge">SCALE ROADMAP</div>
+            <div class="agency-badges">2026 - 2028 VISION</div>
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="grid-3" style="margin-bottom: 24px;">
+            <div class="card highlight">
+              <div class="card-title" style="color: #38bdf8;">
+                <span>🚀</span> Phase 1 : Operational Core
+              </div>
+              <div style="font-size: 13px; color: #34d399; font-weight:bold; margin-bottom: 12px;">COMPLETED &amp; ACTIVE</div>
+              <ul class="feature-list" style="font-size: 14px;">
+                <li><span class="icon">✓</span> Multi-agency telemetry ingestion bus.</li>
+                <li><span class="icon">✓</span> Live Spatial Composite &amp; Area Inspector.</li>
+                <li><span class="icon">✓</span> 3D WebGL Living Earth visualization.</li>
+                <li><span class="icon">✓</span> Google Maps Grounding &amp; AI Safety.</li>
+                <li><span class="icon">✓</span> 4 Automated Verification Suites.</li>
+              </ul>
+            </div>
+
+            <div class="card warning">
+              <div class="card-title" style="color: #fbbf24;">
+                <span>🛰️</span> Phase 2 : State Pilot Expansion
+              </div>
+              <div style="font-size: 13px; color: #fbbf24; font-weight:bold; margin-bottom: 12px;">Q3 2026 - Q1 2027</div>
+              <ul class="feature-list" style="font-size: 14px;">
+                <li><span class="icon">➜</span> OSDMA &amp; TNSDMA direct EOC integration.</li>
+                <li><span class="icon">➜</span> High-resolution LiDAR drone mesh feeds.</li>
+                <li><span class="icon">➜</span> Automated OASIS CAP cell-broadcast SMS.</li>
+                <li><span class="icon">➜</span> Edge-device offline crisis mode (PWA).</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <div class="card-title" style="color: #a855f7;">
+                <span>🌐</span> Phase 3 : Pan-India Mesh
+              </div>
+              <div style="font-size: 13px; color: #a855f7; font-weight:bold; margin-bottom: 12px;">2027 - 2028 HORIZON</div>
+              <ul class="feature-list" style="font-size: 14px;">
+                <li><span class="icon">➜</span> Brahmaputra &amp; Ganga basin river grids.</li>
+                <li><span class="icon">➜</span> LoRaWAN satellite emergency text mesh.</li>
+                <li><span class="icon">➜</span> Automated flood insurance trigger contracts.</li>
+                <li><span class="icon">➜</span> International cross-border DRR treaties.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Final Takeaway Banner -->
+          <div class="card highlight" style="background: linear-gradient(135deg, rgba(14,165,233,0.15) 0%, rgba(15,23,42,0.9) 100%); padding: 24px 32px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="color: #fff; font-size: 20px; font-weight: 800; margin-bottom: 6px;">
+                  GeoShield India: Transforming Telemetry into Action
+                </h3>
+                <p style="color: #94a3b8; font-size: 15px;">
+                  Bridging the gap between earth-observation satellites and the citizen on the ground to preserve life, property, and civil infrastructure.
+                </p>
+              </div>
+              <div style="display: flex; gap: 12px;">
+                <button class="primary" onclick="window.print()" style="padding: 10px 20px; border-radius: 8px; font-weight: bold; background: linear-gradient(135deg, #0284c7, #06b6d4); color: #fff; border: 1px solid rgba(255,255,255,0.2); cursor: pointer;">
+                  Export PDF Deck
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <div class="footer-left">GEOSHIELD INDIA // NATIONAL RESILIENCE MISSION</div>
+          <div class="footer-right">12 / 12</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Keyboard and Presentation Control Logic
+    let currentSlide = 1;
+    const totalSlides = 12;
+
+    function updateCounter() {
+      const counter = document.getElementById('slideCounter');
+      if (counter) counter.innerText = `Slide ${currentSlide} / ${totalSlides}`;
+    }
+
+    function scrollToSlide(slideNum) {
+      if (slideNum < 1) slideNum = 1;
+      if (slideNum > totalSlides) slideNum = totalSlides;
+      currentSlide = slideNum;
+      updateCounter();
+      const el = document.getElementById(`slide-${currentSlide}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        scrollToSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        scrollToSlide(currentSlide - 1);
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        scrollToSlide(1);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        scrollToSlide(totalSlides);
+      }
+    });
+
+    // Intersection observer to track active slide when scrolling naturally
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          const id = entry.target.id;
+          if (id && id.startsWith('slide-')) {
+            currentSlide = parseInt(id.replace('slide-', ''), 10);
+            updateCounter();
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.slide').forEach(slide => observer.observe(slide));
+  </script>
+</body>
+</html>

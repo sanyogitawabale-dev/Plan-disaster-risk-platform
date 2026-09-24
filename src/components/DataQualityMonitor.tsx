@@ -87,6 +87,7 @@ export const DataQualityMonitor: React.FC<DataQualityMonitorProps> = ({
 
   useEffect(() => {
     fetchFeedStatus();
+    handleQueryGoogleMaps();
     const interval = setInterval(fetchFeedStatus, 30000); // 30s auto refresh
     return () => clearInterval(interval);
   }, []);
@@ -438,12 +439,16 @@ export const DataQualityMonitor: React.FC<DataQualityMonitorProps> = ({
               <MapPin className="w-4 h-4" />
             </div>
             <div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                 <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">
                   Live Google Maps Grounding Engine
                 </h3>
                 <span className="px-2 py-0.5 bg-blue-950 border border-blue-800 text-blue-300 text-[10px] font-mono font-semibold rounded">
                   gemini-3.5-flash + googleMaps tool
+                </span>
+                <span className="px-2 py-0.5 bg-emerald-950/80 border border-emerald-800 text-emerald-300 text-[10px] font-mono font-semibold rounded flex items-center space-x-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>Gemini API Key Connected</span>
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">

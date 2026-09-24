@@ -13,11 +13,14 @@ import {
   Globe,
   Sparkles,
   Radio,
-  FileCheck
+  FileCheck,
+  Presentation,
+  FileDown
 } from 'lucide-react';
 import { StormScenario, RegionalProfile } from '../types';
 
 export type AppTabType =
+  | 'earth-situation'
   | 'geospatial'
   | 'risk-engine'
   | 'digital-twin'
@@ -121,6 +124,19 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Navigation Tabs Bar */}
         <div className="flex items-center space-x-1 overflow-x-auto py-2 scrollbar-none border-t border-slate-800/80 text-xs">
+          <button
+            id="nav-tab-earth-situation"
+            onClick={() => setActiveTab('earth-situation')}
+            className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all flex items-center space-x-1.5 ${
+              activeTab === 'earth-situation'
+                ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 font-extrabold shadow-md shadow-emerald-500/30'
+                : 'text-emerald-400 hover:text-white hover:bg-emerald-950/40 border border-emerald-500/20 font-semibold'
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Earth & Environmental Situation</span>
+          </button>
+
           <button
             id="nav-tab-geospatial"
             onClick={() => setActiveTab('geospatial')}
@@ -237,6 +253,31 @@ export const Header: React.FC<HeaderProps> = ({
             <FileText className="w-3.5 h-3.5" />
             <span>12-Layer System Architecture</span>
           </button>
+
+          <span className="text-slate-700 px-1">|</span>
+
+          <a
+            id="nav-link-presentation"
+            href="/presentation.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1.5 rounded-lg whitespace-nowrap transition-all flex items-center space-x-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-cyan-300 hover:text-white border border-cyan-500/40 font-semibold shadow-sm"
+            title="Open Interactive Presentation Slides in new tab"
+          >
+            <Presentation className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Presentation Deck</span>
+          </a>
+
+          <a
+            id="nav-link-pdf"
+            href="/GeoShield_India_Presentation_Deck.pdf"
+            download="GeoShield_India_Presentation_Deck.pdf"
+            className="px-3 py-1.5 rounded-lg whitespace-nowrap transition-all flex items-center space-x-1.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-300 hover:text-white border border-emerald-500/40 font-semibold shadow-sm"
+            title="Download Converted PDF (12 Slides)"
+          >
+            <FileDown className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Download PDF</span>
+          </a>
         </div>
       </div>
     </header>

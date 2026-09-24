@@ -312,3 +312,37 @@ export interface ArchitectureComparisonItem {
   costLatencyImpact: string;
 }
 
+// -------------------------------------------------------------
+// Google Flood Forecasting API / CWC River Gauge Dataset
+// Documentation: https://developers.google.com/flood-forecasting
+// -------------------------------------------------------------
+export interface GoogleFloodGaugeRecord {
+  gaugeId: string;
+  gaugeName: string;
+  riverName: string;
+  basin: string;
+  stationCode: string;
+  coordinates: { latitude: number; longitude: number };
+  waterLevelM: number;
+  warningLevelM: number;
+  dangerLevelM: number;
+  historicalHighestFloodLevelM: number;
+  qualityVerified: boolean;
+  floodSeverity: 'NORMAL' | 'WARNING' | 'DANGER' | 'EXTREME';
+  forecasts7Day: Array<{
+    forecastTimestamp: string;
+    forecastedWaterLevelM: number;
+    probabilityExceedancePct: number;
+  }>;
+  returnPeriodThresholds: {
+    rp2YearsM: number;
+    rp5YearsM: number;
+    rp20YearsM: number;
+    rp50YearsM: number;
+  };
+  dischargeM3s: number;
+  sluiceGateStatus?: string;
+  sourceReference: string;
+}
+
+
