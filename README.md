@@ -10,6 +10,8 @@
 [![Express](https://img.shields.io/badge/Express-4.21-000000.svg?logo=express&logoColor=white)](server.ts)
 [![Google GenAI](https://img.shields.io/badge/Google%20GenAI-Gemini%20Flash-4285F4.svg?logo=google&logoColor=white)](https://ai.google.dev/)
 [![Automated Tests](https://img.shields.io/badge/Verification%20Suites-94%2F94%20Passed%20(100%25)-10B981.svg)](scripts/)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/sanyogitawabale-dev/Plan-disaster-risk-platform)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sanyogitawabale-dev/Plan-disaster-risk-platform)
 [![License](https://img.shields.io/badge/License-MIT-gray.svg)](LICENSE)
 
 ---
@@ -21,6 +23,7 @@
 - [Key Features & Capabilities](#-key-features--capabilities)
 - [System Architecture](#-system-architecture)
 - [12-Slide Executive Presentation Deck & PDF](#-12-slide-executive-presentation-deck--pdf)
+- [Live Cloud Deployment (Run from Anywhere)](#-live-cloud-deployment-run-from-anywhere)
 - [Getting Started](#-getting-started)
 - [Automated Verification Suites](#-automated-verification-suites)
 - [Directory Layout](#-directory-layout)
@@ -160,6 +163,32 @@ GeoShield includes a complete executive presentation deck ready for stakeholders
 | **10** | Crisis Lab | Counterfactual "What-If" Simulation with Real-Time Stress Controls |
 | **11** | QA & Benchmarks | 100% Automated Test Suite Passing (94/94 Test Vectors) |
 | **12** | Roadmap | Deployment Horizons (OSDMA Pilot $\to$ Pan-India River Basin Mesh) |
+
+---
+
+## 🌐 Live Cloud Deployment (Run from Anywhere)
+
+You can access and run GeoShield India from anywhere across any device:
+
+### Option 1: 1-Click Cloud Deployment on Render.com (Recommended Full-Stack)
+Render automatically provisions both the Vite React frontend and Express backend using the repository's [`render.yaml`](render.yaml):
+1. Click the button:  
+   [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/sanyogitawabale-dev/Plan-disaster-risk-platform)
+2. Sign in with your GitHub account on [Render.com](https://render.com).
+3. Under Environment Variables, add your optional `GEMINI_API_KEY`.
+4. Click **Apply**. Render will compile and launch the production platform at a permanent public URL (e.g. `https://geoshield-india.onrender.com`).
+
+### Option 2: 1-Click Frontend Deployment on Vercel
+1. Click the button:  
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sanyogitawabale-dev/Plan-disaster-risk-platform)
+2. Sign in on [Vercel.com](https://vercel.com).
+3. The repository auto-configures with [`vercel.json`](vercel.json) (`Build: npm run build`, `Output: dist`).
+4. Click **Deploy** to receive an instant, high-speed CDN URL (e.g. `https://plan-disaster-risk-platform.vercel.app`).
+
+### Option 3: Instant Live Public Tunnel (Active Right Now)
+You can also access the running instance right now from any smartphone, tablet, or external computer:
+- **Live Public URL**: 👉 [https://geoshield-india.loca.lt](https://geoshield-india.loca.lt)
+- *Tunnel Password / IP (if prompted)*: `103.121.71.98`
 
 ---
 
