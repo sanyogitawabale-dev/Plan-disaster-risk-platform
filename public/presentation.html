@@ -134,6 +134,12 @@
       .card.success {
         background: #0d1f1c !important;
       }
+      img {
+        max-width: 100% !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        display: block !important;
+      }
       .slide-title, .cover-title {
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
@@ -751,31 +757,46 @@
          ========================================== -->
     <section class="slide cover-slide" id="slide-1">
       <div class="slide-content">
-        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-          <div class="cover-badge">
-            <span class="status-dot"></span>
-            NATIONAL DISASTER MANAGEMENT & EARLY WARNING ARCHITECTURE
+        <div style="flex: 1; display: flex; gap: 48px; align-items: center;">
+          <div style="flex: 1.15; display: flex; flex-direction: column; justify-content: center;">
+            <div class="cover-badge">
+              <span class="status-dot"></span>
+              NATIONAL DISASTER MANAGEMENT &amp; EARLY WARNING ARCHITECTURE
+            </div>
+            <h1 class="cover-title">GeoShield India</h1>
+            <p class="cover-subtitle">
+              Public Environmental Intelligence &amp; Global Crisis Risk Operations Platform. Unifying multi-agency satellite, radar, and river telemetry with deterministic physical modeling and ground-truth AI verification.
+            </p>
+            <div class="cover-stats">
+              <div class="stat-item">
+                <span class="stat-num" style="color: #38bdf8;">4+ Agencies</span>
+                <span class="stat-desc">CWC, IMD, INCOIS, ESA Sentinel</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-num" style="color: #34d399;">100% Passed</span>
+                <span class="stat-desc">4 Automated Test Suites (94 Tests)</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-num" style="color: #f59e0b;">&lt; 120ms</span>
+                <span class="stat-desc">Deterministic Spatial Synthesis Latency</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-num" style="color: #a855f7;">4 Languages</span>
+                <span class="stat-desc">English, हिन्दी, ଓଡ଼ିଆ, বাংলা</span>
+              </div>
+            </div>
           </div>
-          <h1 class="cover-title">GeoShield India</h1>
-          <p class="cover-subtitle">
-            Public Environmental Intelligence & Global Crisis Risk Operations Platform. Unifying multi-agency satellite, radar, and river telemetry with deterministic physical modeling and ground-truth AI verification.
-          </p>
-          <div class="cover-stats">
-            <div class="stat-item">
-              <span class="stat-num" style="color: #38bdf8;">4+ Agencies</span>
-              <span class="stat-desc">CWC, IMD, INCOIS, ESA Sentinel</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-num" style="color: #34d399;">100% Passed</span>
-              <span class="stat-desc">4 Automated Test Suites (94 Tests)</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-num" style="color: #f59e0b;">&lt; 120ms</span>
-              <span class="stat-desc">Deterministic Spatial Synthesis Latency</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-num" style="color: #a855f7;">4 Languages</span>
-              <span class="stat-desc">English, हिन्दी, ଓଡ଼ିଆ, বাংলা</span>
+          <div style="flex: 0.85; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="background: rgba(15, 23, 42, 0.85); border: 2px solid rgba(56, 189, 248, 0.4); border-radius: 14px; overflow: hidden; width: 100%;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: rgba(3, 7, 18, 0.9); border-bottom: 1px solid rgba(56, 189, 248, 0.25); font-family: 'Consolas', 'Segoe UI Mono', monospace; font-size: 11px;">
+                <span style="color: #38bdf8; font-weight: bold;">● LIVE IMD DOPPLER RADAR // ODYSSEY CONSOLE</span>
+                <span style="color: #34d399;">SWEEP: 42 mm/h</span>
+              </div>
+              <img src="assets/presentation/gis_radar_map_hd.png" alt="GIS Doppler Radar" style="width: 100%; height: 320px; object-fit: cover; display: block;" />
+              <div style="padding: 10px 16px; background: rgba(3, 7, 18, 0.9); border-top: 1px solid rgba(255, 255, 255, 0.08); font-family: 'Consolas', 'Segoe UI Mono', monospace; font-size: 11px; color: #94a3b8; display: flex; justify-content: space-between;">
+                <span>SENSOR STAGE: 21.65m (+0.65m DANGER)</span>
+                <span style="color: #f59e0b;">STATUS: CRITICAL WATCH</span>
+              </div>
             </div>
           </div>
         </div>
@@ -887,6 +908,13 @@
                 </ul>
               </div>
             </div>
+          </div>
+
+          <div style="margin-top: 14px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(239, 68, 68, 0.3);">
+            <div style="padding: 5px 12px; background: rgba(3,7,18,0.9); font-family: 'Consolas', monospace; font-size: 10px; color: #f87171; font-weight: bold;">
+              ● COMPARATIVE INFOGRAPHIC: LEGACY FRAGMENTED BULLETINS VS. GEOSHIELD REAL-TIME FUSION
+            </div>
+            <img src="assets/presentation/translation_gap_infographic_hd.png" alt="Translation Gap Comparison" style="width: 100%; height: 130px; object-fit: cover; display: block;" />
           </div>
         </div>
         <div class="slide-footer">
@@ -1133,6 +1161,15 @@
                   <div class="metric-label">Coastal High-Tide Surge</div>
                 </div>
               </div>
+
+              <!-- Composite Telemetry Visualizer -->
+              <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; overflow: hidden;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: rgba(3, 7, 18, 0.9); font-family: 'Consolas', 'Segoe UI Mono', monospace; font-size: 11px;">
+                  <span style="color: #38bdf8; font-weight: bold;">● MULTI-AGENCY COMPOSITE TELEMETRY MATRIX</span>
+                  <span style="color: #34d399;">REAL-TIME FUSION</span>
+                </div>
+                <img src="assets/presentation/multi_agency_telemetry_grid_hd.png" alt="Composite Telemetry Matrix" style="width: 100%; height: 160px; object-fit: cover; display: block;" />
+              </div>
             </div>
 
             <!-- Right: 5-Step Causal Chain -->
@@ -1253,24 +1290,32 @@
               </div>
             </div>
 
-            <!-- Mitigation Decision Panel -->
-            <div class="card highlight" style="flex: 1; padding: 24px;">
-              <div class="card-title" style="color: #38bdf8; font-size: 18px; margin-bottom: 12px;">
-                <span>🛡️</span> GeoShield Automated Mitigation Recommendations
+            <!-- Mitigation Decision Panel & Topology Graph -->
+            <div style="display: flex; gap: 20px; flex: 1;">
+              <div class="card highlight" style="flex: 1.15; padding: 20px;">
+                <div class="card-title" style="color: #38bdf8; font-size: 17px; margin-bottom: 12px;">
+                  <span>🛡️</span> GeoShield Automated Mitigation Recommendations
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div style="background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 8px;">
+                    <strong style="color: #34d399; font-size: 13px; display: block; margin-bottom: 2px;">1. Substation Islanding</strong>
+                    <p style="font-size: 12px; color: #94a3b8;">Isolate Feeders 3 &amp; 4; route emergency backup feed from elevated Chauliaganj substation grid.</p>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 8px;">
+                    <strong style="color: #38bdf8; font-size: 13px; display: block; margin-bottom: 2px;">2. Mobile DG Pre-Positioning</strong>
+                    <p style="font-size: 12px; color: #94a3b8;">Dispatch 500kVA high-clearance truck generators to SCB Medical College before causeway water exceeds 0.5m.</p>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 8px;">
+                    <strong style="color: #fbbf24; font-size: 13px; display: block; margin-bottom: 2px;">3. Tanker Escort via Bypass</strong>
+                    <p style="font-size: 12px; color: #94a3b8;">Deploy National Highway 16 elevated flyover corridor to route diesel fuel convoys with police escort.</p>
+                  </div>
+                </div>
               </div>
-              <div class="grid-3" style="gap: 20px;">
-                <div style="background: rgba(0,0,0,0.3); padding: 14px; border-radius: 8px;">
-                  <strong style="color: #34d399; font-size: 14px; display: block; margin-bottom: 4px;">1. Substation Islanding</strong>
-                  <p style="font-size: 13px; color: #94a3b8;">Isolate Feeders 3 &amp; 4; route emergency backup feed from elevated Chauliaganj substation grid.</p>
+              <div style="flex: 0.85; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column;">
+                <div style="padding: 8px 14px; background: rgba(3, 7, 18, 0.9); font-family: 'Consolas', 'Segoe UI Mono', monospace; font-size: 11px; color: #38bdf8; font-weight: bold; border-bottom: 1px solid rgba(56, 189, 248, 0.2);">
+                  ● DIGITAL TWIN TOPOLOGY GRAPH
                 </div>
-                <div style="background: rgba(0,0,0,0.3); padding: 14px; border-radius: 8px;">
-                  <strong style="color: #38bdf8; font-size: 14px; display: block; margin-bottom: 4px;">2. Mobile DG Pre-Positioning</strong>
-                  <p style="font-size: 13px; color: #94a3b8;">Dispatch 500kVA high-clearance truck generators to SCB Medical College before causeway water exceeds 0.5m.</p>
-                </div>
-                <div style="background: rgba(0,0,0,0.3); padding: 14px; border-radius: 8px;">
-                  <strong style="color: #fbbf24; font-size: 14px; display: block; margin-bottom: 4px;">3. Tanker Escort via Bypass</strong>
-                  <p style="font-size: 13px; color: #94a3b8;">Deploy National Highway 16 elevated flyover corridor to route diesel fuel convoys with police escort.</p>
-                </div>
+                <img src="assets/presentation/digital_twin_topology_hd.png" alt="Digital Twin Topology Graph" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
               </div>
             </div>
           </div>
@@ -1329,6 +1374,7 @@
                   <strong>Pulsing Incident Beacons:</strong> Color-coded severity pins for real-time alerts across coastal districts.
                 </li>
               </ul>
+              <img src="assets/presentation/planetary_earth_hd.png" alt="3D Living Earth Globe" style="width: 100%; height: 210px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.3); margin-top: 16px; display: block;" />
             </div>
 
             <!-- Multilingual Public Cards -->
@@ -1421,6 +1467,7 @@
                   <strong>Deterministic Verification:</strong> Coordinates and operational status checked before text generation.
                 </li>
               </ul>
+              <img src="assets/presentation/google_maps_grounding_hd.png" alt="Google Maps Platform Grounding View" style="width: 100%; height: 210px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(56,189,248,0.3); margin-top: 16px; display: block;" />
             </div>
 
             <!-- Statutory Hierarchy -->
@@ -1509,6 +1556,7 @@
                   <span style="font-size: 13px; color: #94a3b8;">Models gravity drainage blockage when coastal storm surges impede seaward river flow.</span>
                 </div>
               </div>
+              <img src="assets/presentation/hydrodynamic_physics_hd.png" alt="Hydrodynamic Physics Cross-Section & Anti-Leakage Ledger" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(56,189,248,0.3); margin-top: 14px; display: block;" />
             </div>
 
             <!-- Temporal Anti-Leakage -->
@@ -1625,11 +1673,18 @@
                 </div>
               </div>
 
-              <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); padding: 16px; border-radius: 8px;">
+              <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); padding: 14px; border-radius: 8px;">
                 <strong style="color: #f87171; display: block; margin-bottom: 4px;">Automated EOC Trigger:</strong>
                 <p style="font-size: 13px; color: #cbd5e1;">
                   Evacuation window narrows from 12h to <strong>4.5h</strong>. Pre-order 8 additional NDRF inflatable boat teams to Kendrapara North Sector immediately.
                 </p>
+              </div>
+
+              <div style="border-radius: 8px; overflow: hidden; border: 1px solid rgba(239,68,68,0.3); margin-top: 14px;">
+                <div style="padding: 6px 12px; background: rgba(3,7,18,0.9); font-family: 'Consolas', monospace; font-size: 10px; color: #f87171; font-weight: bold;">
+                  ● PREDICTED FLOOD POOLING &amp; HIGHWAY CORRIDOR [BREACH MODEL]
+                </div>
+                <img src="assets/presentation/flood_hazard_depth_hd.png" alt="Recalculated Inundation Simulation" style="width: 100%; height: 140px; object-fit: cover; display: block;" />
               </div>
             </div>
           </div>
@@ -1803,13 +1858,13 @@
           </div>
 
           <!-- Final Takeaway Banner -->
-          <div class="card highlight" style="background: linear-gradient(135deg, rgba(14,165,233,0.15) 0%, rgba(15,23,42,0.9) 100%); padding: 24px 32px;">
+          <div class="card highlight" style="background: linear-gradient(135deg, rgba(14,165,233,0.15) 0%, rgba(15,23,42,0.9) 100%); padding: 20px 28px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <div>
-                <h3 style="color: #fff; font-size: 20px; font-weight: 800; margin-bottom: 6px;">
+                <h3 style="color: #fff; font-size: 19px; font-weight: 800; margin-bottom: 4px;">
                   GeoShield India: Transforming Telemetry into Action
                 </h3>
-                <p style="color: #94a3b8; font-size: 15px;">
+                <p style="color: #94a3b8; font-size: 14px;">
                   Bridging the gap between earth-observation satellites and the citizen on the ground to preserve life, property, and civil infrastructure.
                 </p>
               </div>
@@ -1819,6 +1874,13 @@
                 </button>
               </div>
             </div>
+          </div>
+
+          <div style="margin-top: 14px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(56, 189, 248, 0.3);">
+            <div style="padding: 5px 12px; background: rgba(3,7,18,0.9); font-family: 'Consolas', monospace; font-size: 10px; color: #38bdf8; font-weight: bold;">
+              ● NATIONAL COASTAL DEFENSE SHIELD // MULTI-STATE EXPANSION RADAR &amp; EOC NODES
+            </div>
+            <img src="assets/presentation/national_mission_roadmap_hd.png" alt="National Coastal Defense Shield Roadmap" style="width: 100%; height: 130px; object-fit: cover; display: block;" />
           </div>
         </div>
         <div class="slide-footer">

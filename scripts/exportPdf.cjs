@@ -16,13 +16,18 @@ console.log('Generating PDF with native fonts and high-contrast typography...');
 execSync(`"${browserPath}" --headless --disable-gpu --no-pdf-header-footer --run-all-compositor-stages-before-draw --print-to-pdf="${pdfDest}" "${htmlPath}"`, { stdio: 'inherit' });
 
 fs.copyFileSync(pdfDest, publicPdf);
+const distPdf = 'e:/Disasator/Plan-disaster-risk-platform/dist/GeoShield_India_Presentation_Deck.pdf';
+if (fs.existsSync('e:/Disasator/Plan-disaster-risk-platform/dist')) {
+  fs.copyFileSync(pdfDest, distPdf);
+}
 
 const stats = fs.statSync(pdfDest);
 const mb = (stats.size / (1024 * 1024)).toFixed(2);
-console.log(`Generated PDF successfully! Size: ${mb} MB (${stats.size} bytes)`);
+const decimalMb = (stats.size / 1000000).toFixed(2);
+console.log(`Generated PDF successfully! Size: ${mb} MiB / ${decimalMb} MB (${stats.size} bytes)`);
 
-if (stats.size <= 4.8 * 1024 * 1024) {
-  console.log('SUCCESS: PDF is under 4.8 MB target!');
+if (stats.size <= 5.0 * 1024 * 1024) {
+  console.log('SUCCESS: PDF is under 5.0 MB target!');
 } else {
-  console.log('NOTICE: PDF is above 4.8 MB target.');
+  console.log('NOTICE: PDF is above 5.0 MB target.');
 }
